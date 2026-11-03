@@ -1,1 +1,360 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090909">
+<title>ZIZO GAMES</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#f5f5f5;font-family:Arial,sans-serif}
+button{cursor:pointer;border:0;border-radius:10px;padding:12px 18px;font-weight:bold}
+header{padding:20px;text-align:center;background:#111;border-bottom:1px solid #b99539}
+.logo{font-size:30px;font-weight:900;color:#e4bd55;letter-spacing:2px}
+.logo span{color:white}
+header small{color:#aaa}
+main{max-width:900px;margin:auto;padding:18px}
+.panel{background:#151515;border:1px solid #34302a;border-radius:16px;padding:18px;margin:15px 0}
+h2{color:#e4bd55;margin-top:0}
+h3{margin:8px 0}
+.gold{background:#d8ad45;color:#111}
+.dark{background:#292929;color:white}
+.red{background:#8d2828;color:white}
+button:disabled{opacity:.35;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.mode{background:#1c1c1c;border:1px solid #a78435;color:white;padding:22px 12px;min-height:110px}
+.mode strong{display:block;color:#e4bd55;font-size:18px;margin-bottom:9px}
+input,select{width:100%;padding:12px;border-radius:9px;background:#222;color:white;border:1px solid #555;margin:7px 0}
+.hidden{display:none!important}
+.stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.stat{background:#222;padding:12px;border-radius:10px;flex:1;text-align:center;min-width:100px}
+.stat b{display:block;color:#e4bd55;font-size:20px;margin-top:5px}
+.card{background:linear-gradient(145deg,#28251d,#111);border:1px solid #b99539;border-radius:14px;padding:15px;text-align:center;min-width:130px}
+.avatar{width:65px;height:65px;border-radius:50%;background:#d4ad4d;color:#111;font-size:25px;font-weight:bold;display:grid;place-items:center;margin:0 auto 10px}
+.rating{font-size:27px;color:#e4bd55;font-weight:bold}
+.muted{color:#aaa;font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions button{flex:1}
+#log{background:#101010;border-radius:10px;padding:12px;max-height:180px;overflow:auto;color:#bbb;font-size:14px;line-height:1.8}
+#message{color:#e4bd55;min-height:25px;margin:12px 0}
+.player-row{display:flex;justify-content:space-between;padding:9px;border-bottom:1px solid #333}
+footer{text-align:center;color:#777;padding:25px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">ZIZO <span>GAMES</span></div>
+ <small>BUILD YOUR DREAM TEAM</small>
+</header>
+<main>
 
+<section id="home">
+ <div class="panel">
+  <h2>اختار طريقة اللعب</h2>
+  <div class="grid">
+   <button class="mode" onclick="setup('auction')"><strong>⚖️ المزاد</strong>نافس الذكاء الاصطناعي على اللاعبين</button>
+   <button class="mode" onclick="setup('packs')"><strong>🎁 الباكات</strong>افتح باكات وابني فريقك</button>
+  </div>
+ </div>
+ <div class="panel">
+  <h2>فريقك الحالي</h2>
+  <div class="stats">
+   <div class="stat">عدد اللاعبين<b id="homeCount">0</b></div>
+   <div class="stat">رصيدك<b id="homeMoney">200M</b></div>
+  </div>
+ </div>
+</section>
+
+<section id="setup" class="hidden">
+ <div class="panel">
+  <h2 id="setupTitle">إعداد اللعبة</h2>
+  <label>مستوى الذكاء الاصطناعي</label>
+  <select id="difficulty">
+   <option value="easy">سهل</option>
+   <option value="normal" selected>متوسط</option>
+   <option value="hard">صعب</option>
+  </select>
+  <label>عدد اللاعبين المطلوب</label>
+  <select id="target">
+   <option value="5">5 لاعبين</option>
+   <option value="7">7 لاعبين</option>
+   <option value="11" selected>11 لاعب</option>
+  </select>
+  <label>ميزانية كل لاعب</label>
+  <select id="budget">
+   <option value="100">100M</option>
+   <option value="150">150M</option>
+   <option value="200" selected>200M</option>
+   <option value="500">500M</option>
+   <option value="1000">1000M</option>
+  </select>
+  <div class="actions">
+   <button class="gold" onclick="startGame()">ابدأ اللعب</button>
+   <button class="dark" onclick="goHome()">رجوع</button>
+  </div>
+ </div>
+</section>
+
+<section id="game" class="hidden">
+ <div class="panel">
+  <div class="stats">
+   <div class="stat">رصيدك<b id="myMoney">200M</b></div>
+   <div class="stat">رصيد AI<b id="aiMoney">200M</b></div>
+   <div class="stat">فريقك<b id="myCount">0/11</b></div>
+   <div class="stat">فريق AI<b id="aiCount">0/11</b></div>
+  </div>
+ </div>
+
+ <div class="panel">
+  <h2 id="gameTitle">المزاد</h2>
+  <div id="playerCard"></div>
+  <div id="message"></div>
+  <div id="auctionControls" class="actions hidden">
+   <button class="gold" onclick="bid(5)">زايد +5M</button>
+   <button class="gold" onclick="bid(10)">زايد +10M</button>
+   <button class="gold" onclick="bid(20)">زايد +20M</button>
+   <button class="red" onclick="passBid()">انسحب</button>
+  </div>
+  <div id="packControls" class="actions hidden">
+   <button class="gold" onclick="openPack()">افتح باك 20M</button>
+  </div>
+  <div id="nextControls" class="actions hidden">
+   <button class="gold" onclick="nextRound()">اللاعب التالي</button>
+  </div>
+  <button class="dark" onclick="showTeams()">عرض الفريقين</button>
+  <button class="dark" onclick="goHome()">خروج</button>
+ </div>
+
+ <div class="panel">
+  <h2>فريقك</h2><div id="myTeam"></div>
+ </div>
+ <div class="panel">
+  <h2>فريق الذكاء الاصطناعي</h2><div id="aiTeam"></div>
+ </div>
+ <div class="panel">
+  <h2>سجل الأحداث</h2><div id="log"></div>
+ </div>
+</section>
+
+<section id="result" class="hidden">
+ <div class="panel">
+  <h2>نتيجة المنافسة 🏆</h2>
+  <div id="resultText"></div>
+  <button class="gold" onclick="goHome()">العودة للرئيسية</button>
+ </div>
+</section>
+</main>
+<footer>ZIZO GAMES © 2026</footer>
+
+<script>
+const players=[
+["Alisson","GK",89,20],["Courtois","GK",91,25],["Donnarumma","GK",90,22],
+["Buffon","GK",94,35],["Neuer","GK",93,35],["Ederson","GK",88,18],
+["Maldini","DEF",96,45],["Van Dijk","DEF",92,35],["Ramos","DEF",91,30],
+["Nesta","DEF",94,38],["Cannavaro","DEF",94,38],["Hakimi","DEF",88,20],
+["Roberto Carlos","DEF",94,38],["Bellingham","MID",91,38],
+["De Bruyne","MID",93,42],["Pedri","MID",89,25],["Xavi","MID",95,40],
+["Iniesta","MID",95,40],["Zidane","MID",97,55],["Pirlo","MID",94,38],
+["Modric","MID",92,35],["Valverde","MID",89,25],["Kaka","MID",94,40],
+["Salah","ATT",92,40],["Mbappe","ATT",94,50],["Messi","ATT",98,65],
+["Ronaldo","ATT",97,60],["Neymar","ATT",93,42],["Haaland","ATT",92,40],
+["Ronaldinho","ATT",96,50],["Pele","ATT",98,65],["R9","ATT",97,60],
+["Henry","ATT",95,45],["Benzema","ATT",91,32],["Vinicius","ATT",91,35],
+["Maradona","ATT",98,65],["Eto'o","ATT",93,38],["Rooney","ATT",92,35],
+["Foden","MID",88,20],["Rodri","MID",92,38]
+];
+
+let mode="auction",budget=200,target=11,difficulty="normal";
+let myMoney=200,aiMoney=200,myTeam=[],aiTeam=[];
+let pool=[],current=null,price=0,turn="me",roundDone=false,used=[];
+let gameOver=false;
+
+const $=id=>document.getElementById(id);
+function section(id){
+ ["home","setup","game","result"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
+}
+function goHome(){
+ section("home");
+ $("homeCount").textContent=myTeam.length;
+ $("homeMoney").textContent=myMoney+"M";
+}
+function setup(m){
+ mode=m;
+ $("setupTitle").textContent=m==="auction"?"إعداد المزاد":"إعداد الباكات";
+ section("setup");
+}
+function startGame(){
+ difficulty=$("difficulty").value;
+ target=Number($("target").value);
+ budget=Number($("budget").value);
+ myMoney=aiMoney=budget;
+ myTeam=[];aiTeam=[];used=[];gameOver=false;
+ pool=players.map((p,i)=>({id:i,name:p[0],pos:p[1],rating:p[2],value:p[3]}));
+ pool.sort(()=>Math.random()-.5);
+ $("log").innerHTML="";
+ $("gameTitle").textContent=mode==="auction"?"⚖️ مزاد اللاعبين":"🎁 تحدي الباكات";
+ $("auctionControls").classList.toggle("hidden",mode!=="auction");
+ $("packControls").classList.toggle("hidden",mode!=="packs");
+ $("nextControls").classList.add("hidden");
+ section("game");
+ updateStats();
+ if(mode==="auction")startAuction();
+ else {
+  $("playerCard").innerHTML="<h3>افتح باكك الأول!</h3><p class='muted'>سعر الباك 20M — الذكاء الاصطناعي هيفتح باك في نفس الجولة.</p>";
+  msg("ابدأ بفتح أول باك.");
+ }
+}
+function msg(t){$("message").textContent=t}
+function log(t){
+ $("log").innerHTML="<div>• "+t+"</div>"+$("log").innerHTML;
+}
+function updateStats(){
+ $("myMoney").textContent=myMoney+"M";
+ $("aiMoney").textContent=aiMoney+"M";
+ $("myCount").textContent=myTeam.length+"/"+target;
+ $("aiCount").textContent=aiTeam.length+"/"+target;
+ renderTeams();
+}
+function renderTeams(){
+ $("myTeam").innerHTML=myTeam.map(p=>row(p)).join("")||"لسه مفيش لاعبين";
+ $("aiTeam").innerHTML=aiTeam.map(p=>row(p)).join("")||"لسه مفيش لاعبين";
+}
+function row(p){
+ return `<div class="player-row"><span>${p.name} <small class="muted">${p.pos}</small></span><b>${p.rating}</b></div>`;
+}
+function card(p,extra=""){
+ return `<div class="card"><div class="avatar">${p.name.slice(0,2).toUpperCase()}</div><h3>${p.name}</h3><div class="rating">${p.rating}</div><p>${p.pos}</p><small class="muted">${extra}</small></div>`;
+}
+function available(){
+ return pool.filter(p=>!used.includes(p.id));
+}
+function choosePlayer(){
+ let a=available();
+ if(!a.length)return null;
+ let weights=a.map(p=>p.rating+Math.random()*12);
+ return a[weights.indexOf(Math.max(...weights))];
+}
+function startAuction(){
+ if(myTeam.length>=target&&aiTeam.length>=target){finish();return}
+ current=choosePlayer();
+ if(!current){finish();return}
+ price=Math.max(5,Math.round(current.value*.55/5)*5);
+ turn="me";roundDone=false;
+ $("playerCard").innerHTML=card(current,"السعر الحالي: "+price+"M");
+ $("auctionControls").classList.remove("hidden");
+ $("nextControls").classList.add("hidden");
+ msg("اللاعب معروض في المزاد! ابدأ المزايدة.");
+ log("بدأ مزاد اللاعب "+current.name);
+}
+function bid(amount){
+ if(roundDone||!current)return;
+ if(myTeam.length>=target){msg("اكتمل فريقك!");return}
+ if(myMoney<price+amount){msg("رصيدك مش كفاية للمزايدة دي.");return}
+ price+=amount;
+ turn="ai";
+ $("playerCard").innerHTML=card(current,"أعلى مزايدة: "+price+"M");
+ msg("أنت رفعت السعر إلى "+price+"M. الذكاء الاصطناعي بيفكر...");
+ updateStats();
+ setTimeout(aiTurn,650);
+}
+function aiTurn(){
+ if(roundDone||!current)return;
+ let factor=difficulty==="easy"?.65:difficulty==="hard"?1.15:.9;
+ let maxPrice=current.value*factor;
+ let need=aiTeam.length<target;
+ let shouldBid=need&&aiMoney>=price+5&&price<maxPrice&&Math.random()<(difficulty==="hard"?.9:difficulty==="easy"?.48:.7);
+ if(shouldBid){
+  let inc=difficulty==="hard"?10:5;
+  if(aiMoney<price+inc)inc=5;
+  price+=inc;
+  turn="me";
+  $("playerCard").innerHTML=card(current,"الذكاء الاصطناعي زايد! السعر "+price+"M");
+  msg("الذكاء الاصطناعي زايد إلى "+price+"M. دورك!");
+  updateStats();
+ }else{
+  aiMoney=Math.max(0,aiMoney);
+  if(myMoney>=price&&myTeam.length<target){
+   myTeam.push(current);myMoney-=price;
+   log("أنت فزت بـ "+current.name+" مقابل "+price+"M");
+   msg("كسبت المزاد! اللاعب بقى في فريقك.");
+  }else{
+   msg("الذكاء الاصطناعي انسحب، لكن رصيدك لا يكفي.");
+  }
+  endRound();
+ }
+}
+function passBid(){
+ if(roundDone||!current)return;
+ if(aiTeam.length<target&&aiMoney>=price){
+  aiTeam.push(current);aiMoney-=price;
+  log("الذكاء الاصطناعي فاز بـ "+current.name+" مقابل "+price+"M");
+  msg("انسحبت. الذكاء الاصطناعي كسب اللاعب.");
+ }else{
+  msg("انسحبت من المزاد.");
+ }
+ endRound();
+}
+function endRound(){
+ roundDone=true;
+ used.push(current.id);
+ $("auctionControls").classList.add("hidden");
+ $("nextControls").classList.remove("hidden");
+ updateStats();
+ if(myTeam.length>=target&&aiTeam.length>=target){
+  $("nextControls").textContent="عرض النتيجة";
+ }
+}
+function nextRound(){
+ if(myTeam.length>=target&&aiTeam.length>=target){finish();return}
+ $("nextControls").textContent="اللاعب التالي";
+ startAuction();
+}
+function openPack(){
+ if(gameOver)return;
+ if(myTeam.length>=target){msg("فريقك اكتمل.");return}
+ if(myMoney<20){msg("رصيدك لا يكفي لشراء باك.");return}
+ myMoney-=20;
+ let p=choosePlayer();
+ if(!p){finish();return}
+ myTeam.push(p);used.push(p.id);
+ let aiP=null;
+ if(aiTeam.length<target&&aiMoney>=20){
+  aiMoney-=20;
+  aiP=choosePlayer();
+  if(aiP){aiTeam.push(aiP);used.push(aiP.id)}
+ }
+ $("playerCard").innerHTML=
+  "<h3>نتيجة فتح الباك 🎉</h3><div class='grid'>"+
+  "<div>"+card(p,"باكك")+"</div>"+
+  (aiP?"<div>"+card(aiP,"باك الذكاء الاصطناعي")+"</div>":"")+
+  "</div>";
+ log("فتحت باك وحصلت على "+p.name+(aiP?" — والـAI حصل على "+aiP.name:""));
+ updateStats();
+ if(myTeam.length>=target||myMoney<20){
+  $("packControls").classList.add("hidden");
+  $("nextControls").classList.remove("hidden");
+  $("nextControls").textContent="عرض النتيجة";
+  msg("انتهت باكاتك! اعرض النتيجة.");
+ }else msg("تقدر تفتح باك تاني.");
+}
+function showTeams(){
+ alert("فريقك: "+myTeam.map(p=>p.name).join("، ")+"\n\nفريق AI: "+aiTeam.map(p=>p.name).join("، "));
+}
+function finish(){
+ gameOver=true;
+ let myScore=myTeam.reduce((s,p)=>s+p.rating,0);
+ let aiScore=aiTeam.reduce((s,p)=>s+p.rating,0);
+ let winner=myScore>aiScore?"أنت الفائز 🏆":myScore<aiScore?"الذكاء الاصطناعي فاز": "تعادل!";
+ section("result");
+ $("resultText").innerHTML=
+ `<h3>${winner}</h3>
+ <div class="stats">
+ <div class="stat">تقييم فريقك<b>${myScore}</b></div>
+ <div class="stat">تقييم AI<b>${aiScore}</b></div>
+ </div>
+ <p>فريقك: ${myTeam.length} لاعب</p>
+ <p>فريق الذكاء الاصطناعي: ${aiTeam.length} لاعب</p>`;
+}
+</script>
+</body>
+</html>
