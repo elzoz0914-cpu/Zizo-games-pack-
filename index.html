@@ -542,3 +542,99 @@ function playMatch(){
  state.matches++;save();
  $("matchScore").classList.remove("hidden");
  $("matchScore").innerHTML=`<h2>
+/* ZIZO GAMES - FORMATION SYSTEM */
+
+const formations = {
+  "4-3-3": ["GK","LB","CB","CB","RB","CM","CM","CM","LW","ST","RW"],
+  "4-4-2": ["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"],
+  "4-2-3-1": ["GK","LB","CB","CB","RB","DM","DM","LW","AM","RW","ST"]
+};
+
+function installFormationSystem(){
+  const pitch = document.querySelector(".pitch");
+  if(!pitch || document.getElementById("formationSelect")) return;
+
+  const controls = document.createElement("div");
+  controls.innerHTML = `
+    <h2>اختار خطتك</h2>
+    <select id="formationSelect">
+      <option value="4-3-3">4-3-3</option>
+      <option value="4-4-2">4-4-2</option>
+      <option value="4-2-3-1">4-2-3-1</option>
+    </select>
+    <p class="muted">اختار التشكيلة المناسبة لفريقك.</p>
+  `;
+  pitch.parentNode.insertBefore(controls,pitch);
+
+  const field = document.createElement("div");
+  field.id = "realFormation";
+  field.className = "pitch";
+  pitch.replaceWith(field);
+
+  document.getElementById("formationSelect")
+    .addEventListener("change",renderFormation);
+
+  renderFormation();
+}
+
+function renderFormation(){
+  const field = document.getElementById("realFormation");
+  if(!field) return;
+
+  const selected = document.getElementById("formationSelect").value;
+  const positions = formations[selected];
+
+  const lines = {
+    "GK":[0],
+    "DEF":[],
+    "MID":[],
+    "FWD":[]
+  };
+
+  positions.forEach((pos,index)=>{
+    if(pos==="GK") lines.GK.push(index);
+    else if(["LB","CB","RB"].includes(pos)) lines.DEF.push(index);
+    else if(["CM","DM","AM","LM","RM"].includes(pos)) lines.MID.push(index);
+    else lines.FWD.push(index);
+  });
+
+  const groups = [lines.FWD,lines.MID,lines.DEF,lines.GK];
+  let playerIndex = 0;
+
+  field.innerHTML = `<div class="pitch-title">${escapeHTML(state.teamName)} • ${selected}</div>`;
+
+  groups.forEach(group=>{
+    const row = document.createElement("div");
+    row.style.cssText =
+      "display:flex;justify-content:space-around;gap:6px;margin:18px 0;flex-wrap:wrap";
+
+    group.forEach(index=>{
+      const p = state.team[playerIndex++];
+      const slot = document.createElement("div");
+      slot.className = "pitch-player";
+      slot.style.minWidth = "65px";
+
+      slot.innerHTML = p
+        ? `<b>${p.rating}</b><br>${escapeHTML(p.name)}<br>${p.pos}`
+        : `<b>${positions[index]}</b><br>فارغ`;
+
+      row.appendChild(slot);
+    });
+
+    field.appendChild(row);
+  });
+
+  if(state.team.length>11){
+    const extra=document.createElement("p");
+    extra.textContent="اللاعبون الاحتياطيون: "+(state.team.length-11);
+    field.appendChild(extra);
+  }
+}
+
+const oldRenderTeam = renderTeam;
+renderTeam = function(){
+  oldRenderTeam();
+  renderFormation();
+};
+
+installFormationSystem();
