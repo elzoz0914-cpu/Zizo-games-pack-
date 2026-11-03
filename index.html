@@ -1,1 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090909">
+<title>ZIZO GAMES</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#090909;color:#fff;
+ font-family:Tahoma,Arial,sans-serif;
+}
+header{
+ background:linear-gradient(120deg,#171717,#30230d);
+ border-bottom:2px solid #d6aa43;
+ text-align:center;padding:22px 10px;
+}
+.logo{font-size:32px;color:#eac15b;font-weight:bold}
+header p{color:#bbb;margin:7px}
+main{max-width:950px;margin:auto;padding:14px}
+.card{
+ background:#171717;border:1px solid #59451f;
+ border-radius:15px;padding:17px;margin:13px 0;
+}
+h2,h3{color:#eac15b}
+button,input,select{
+ width:100%;padding:13px;margin:5px 0;
+ border-radius:9px;font-size:15px;
+}
+button{
+ background:linear-gradient(120deg,#f5d77c,#b8862c);
+ border:0;color:#17120a;font-weight:bold;
+ cursor:pointer;
+}
+button.secondary{
+ background:#292929;color:#fff;
+ border:1px solid #80652e;
+}
+.grid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+ gap:10px;
+}
+.game{
+ background:linear-gradient(145deg,#252525,#111);
+ border:1px solid #76591f;
+ border-radius:13px;padding:20px 10px;
+ text-align:center;cursor:pointer;
+}
+.game .icon{font-size:34px}
+.game h3{margin:10px 0}
+.hidden{display:none!important}
+.muted{color:#aaa;font-size:13px}
+.gold{color:#eac15b}
+.screen{display:none}
+.screen.active{display:block}
+.player-card{
+ background:#242424;border:1px solid #a17b31;
+ border-radius:12px;padding:15px;text-align:center;
+}
+footer{text-align:center;color:#777;padding:20px}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">⚽ ZIZO GAMES</div>
+ <p>THE ULTIMATE FOOTBALL GAMING EXPERIENCE</p>
+</header>
+
+<main>
+
+<!-- الصفحة الرئيسية -->
+<section id="home" class="screen active">
+
+ <div class="card">
+  <h2>أهلاً بك في ZIZO GAMES 🏆</h2>
+  <p>اختار طريقة اللعب وابدأ المنافسة!</p>
+ </div>
+
+ <div class="card">
+  <h2>🎮 اختار وضع اللعب</h2>
+
+  <div class="grid">
+
+   <div class="game" onclick="openScreen('online')">
+    <div class="icon">🌐</div>
+    <h3>غرفة أونلاين</h3>
+    <p class="muted">العب مع صديق من موبايلين</p>
+   </div>
+
+   <div class="game" onclick="openScreen('ai')">
+    <div class="icon">🤖</div>
+    <h3>ضد الكمبيوتر</h3>
+    <p class="muted">نافس الذكاء الاصطناعي</p>
+   </div>
+
+   <div class="game" onclick="openScreen('referee')">
+    <div class="icon">👨‍⚖️</div>
+    <h3>وضع الحكم</h3>
+    <p class="muted">لاعبان على موبايل واحد</p>
+   </div>
+
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>⚽ الألعاب</h2>
+  <div class="grid">
+
+   <div class="game" onclick="openScreen('packs')">
+    <div class="icon">🎁</div>
+    <h3>PACK OPENING</h3>
+   </div>
+
+   <div class="game" onclick="openScreen('match')">
+    <div class="icon">🏟️</div>
+    <h3>MATCH SIMULATOR</h3>
+   </div>
+
+   <div class="game" onclick="openScreen('auction')">
+    <div class="icon">💰</div>
+    <h3>AUCTION</h3>
+   </div>
+
+   <div class="game" onclick="openScreen('billion')">
+    <div class="icon">💎</div>
+    <h3>AUCTION BILLION</h3>
+   </div>
+
+   <div class="game" onclick="openScreen('top13')">
+    <div class="icon">🏆</div>
+    <h3>TOP 13</h3>
+   </div>
+
+   <div class="game" onclick="openScreen('target')">
+    <div class="icon">🎯</div>
+    <h3>TARGET</h3>
+   </div>
+
+  </div>
+ </div>
+
+</section>
+
+<!-- الغرف الأونلاين -->
+<section id="online" class="screen">
+ <div class="card">
+  <h2>🌐 اللعب مع صديق</h2>
+  <p>أنشئ غرفة أو ادخل بكود صديقك.</p>
+  <button onclick="alert('سيتم تفعيل إنشاء الغرف في الجزء الخاص بنظام Firebase')">
+   إنشاء غرفة جديدة
+  </button>
+  <input id="roomCode" placeholder="اكتب كود الغرفة">
+  <button class="secondary" onclick="alert('سيتم تفعيل الانضمام للغرف في الجزء الخاص بنظام Firebase')">
+   دخول الغرفة
+  </button>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- الذكاء الاصطناعي -->
+<section id="ai" class="screen">
+ <div class="card">
+  <h2>🤖 العب ضد الذكاء الاصطناعي</h2>
+  <p>اختار مستوى المنافس:</p>
+  <select id="difficulty">
+   <option value="easy">سهل</option>
+   <option value="medium">متوسط</option>
+   <option value="hard">صعب</option>
+  </select>
+  <button onclick="startAI()">ابدأ اللعب</button>
+  <div id="aiResult"></div>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- وضع الحكم -->
+<section id="referee" class="screen">
+ <div class="card">
+  <h2>👨‍⚖️ وضع الحكم</h2>
+  <p>اكتب اسمي اللاعبين.</p>
+  <input id="playerOne" placeholder="اسم اللاعب الأول">
+  <input id="playerTwo" placeholder="اسم اللاعب الثاني">
+  <button onclick="startReferee()">إنشاء المباراة</button>
+  <div id="refereeResult"></div>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- الباكات -->
+<section id="packs" class="screen">
+ <div class="card">
+  <h2>🎁 PACK OPENING</h2>
+  <div id="packSetup">
+   <p>اختار ميزانية الباكات وعدد الصناديق.</p>
+   <input type="number" id="packBudget" placeholder="الميزانية">
+   <input type="number" id="packCount" placeholder="عدد الصناديق">
+   <button onclick="alert('نظام فتح الباكات والأدوار في الجزء الثاني')">
+    تأكيد الإعدادات
+   </button>
+  </div>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- المحاكاة -->
+<section id="match" class="screen">
+ <div class="card">
+  <h2>🏟️ MATCH SIMULATOR</h2>
+  <p>تكوين التشكيلات ومحاكاة المباريات.</p>
+  <div id="matchSetup">
+   <p class="muted">سيتم ربط التشكيلات واللاعبين بنظام الباكات.</p>
+  </div>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- المزاد -->
+<section id="auction" class="screen">
+ <div class="card">
+  <h2>💰 AUCTION</h2>
+  <p>اختار نوع المزاد:</p>
+  <button onclick="alert('مزاد 5 لاعبين — ميزانية 100 مليون')">المزاد الخماسي — 100 مليون</button>
+  <button onclick="alert('مزاد 7 لاعبين — ميزانية 150 مليون')">المزاد السباعي — 150 مليون</button>
+  <button onclick="alert('مزاد 11 لاعب — ميزانية 200 مليون')">مزاد الحداشر — 200 مليون</button>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- مزاد المليار -->
+<section id="billion" class="screen">
+ <div class="card">
+  <h2>💎 AUCTION BILLION</h2>
+  <p>18 لاعبًا — 11 أساسيًا و7 احتياطيًا.</p>
+  <p class="gold">الميزانية: مليار لكل لاعب</p>
+  <button onclick="alert('سيتم تفعيل نظام مزاد المليار في الجزء الخاص بالمزادات')">
+   إنشاء مزاد المليار
+  </button>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- TOP 13 -->
+<section id="top13" class="screen">
+ <div class="card">
+  <h2>🏆 TOP 13</h2>
+  <p>تحديات ترتيب اللاعبين والإحصائيات الكروية.</p>
+  <button onclick="alert('سيتم إضافة قوائم TOP 13 وإحصائياتها في الجزء الخاص بها')">
+   ابدأ التحدي
+  </button>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+<!-- TARGET -->
+<section id="target" class="screen">
+ <div class="card">
+  <h2>🎯 TARGET</h2>
+  <p>تحديات جمع اللاعبين وتحقيق الأهداف.</p>
+  <button onclick="alert('سيتم إضافة تحديات TARGET في الجزء الخاص بها')">
+   التحديات
+  </button>
+  <button class="secondary" onclick="openScreen('home')">رجوع</button>
+ </div>
+</section>
+
+</main>
+
+<footer>
+ ZIZO GAMES © 2026
+</footer>
+
+<script>
+function openScreen(id){
+ document.querySelectorAll('.screen').forEach(s=>{
+  s.classList.remove('active');
+ });
+ document.getElementById(id).classList.add('active');
+ window.scrollTo(0,0);
+}
+
+function startAI(){
+ let level=document.getElementById('difficulty').value;
+ document.getElementById('aiResult').innerHTML=
+ '<div class="player-card"><h3>🤖 المنافس: '+level+'</h3>'+
+ '<p>تم اختيار مستوى الذكاء الاصطناعي.</p>'+
+ '<p class="muted">سيتم ربط نظام المباريات في الجزء الخاص بالمحاكاة.</p></div>';
+}
+
+function startReferee(){
+ let a=document.getElementById('playerOne').value.trim();
+ let b=document.getElementById('playerTwo').value.trim();
+ if(!a||!b){
+  alert('اكتب اسم اللاعبين الأول والثاني');
+  return;
+ }
+ document.getElementById('refereeResult').innerHTML=
+ '<div class="player-card"><h3>تم إنشاء المباراة</h3>'+
+ '<p>اللاعب الأول: '+a+'</p>'+
+ '<p>اللاعب الثاني: '+b+'</p>'+
+ '<h2>الدور الآن على '+a+'</h2>'+
+ '<p class="muted">سيتم ربط نظام تبديل الأدوار في الجزء التالي.</p></div>';
+}
+</script>
+
+</body>
+</html>
