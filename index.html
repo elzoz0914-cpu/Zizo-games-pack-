@@ -624,4 +624,646 @@ input:focus {
 
 </div>
 
+<script>
+// =====================================
+// ZIZO GAMES - GAME ENGINE
+// =====================================
 
+const $ = id => document.getElementById(id);
+
+let coins = Number(localStorage.getItem("zg_coins") || 500);
+let myTeam = JSON.parse(localStorage.getItem("zg_myTeam") || "[]");
+let mustafaTeam = JSON.parse(localStorage.getItem("zg_mustafaTeam") || "[]");
+let playerName = localStorage.getItem("zg_name") || "Muaz";
+
+let auction = {
+  active:false,
+  playersPerTeam:5,
+  budget:100,
+  myBudget:100,
+  aiBudget:100,
+  round:0,
+  currentPlayer:null,
+  bid:0,
+  ended:false
+};
+
+// =====================================
+// PLAYER DATABASE
+// =====================================
+
+const PLAYER_DATABASE = [
+{name:"Lionel Messi",rating:97,pos:"RW",club:"Inter Miami",country:"Argentina"},
+{name:"Cristiano Ronaldo",rating:96,pos:"CF",club:"Al Nassr",country:"Portugal"},
+{name:"Kylian Mbappe",rating:97,pos:"CF",club:"Real Madrid",country:"France"},
+{name:"Erling Haaland",rating:96,pos:"CF",club:"Manchester City",country:"Norway"},
+{name:"Neymar Jr",rating:94,pos:"LW",club:"Santos",country:"Brazil"},
+{name:"Mohamed Salah",rating:95,pos:"RW",club:"Liverpool",country:"Egypt"},
+{name:"Kevin De Bruyne",rating:95,pos:"AMF",club:"Napoli",country:"Belgium"},
+{name:"Jude Bellingham",rating:94,pos:"CMF",club:"Real Madrid",country:"England"},
+{name:"Vinicius Junior",rating:95,pos:"LW",club:"Real Madrid",country:"Brazil"},
+{name:"Harry Kane",rating:94,pos:"CF",club:"Bayern Munich",country:"England"},
+{name:"Luka Modric",rating:92,pos:"CMF",club:"AC Milan",country:"Croatia"},
+{name:"Robert Lewandowski",rating:94,pos:"CF",club:"Barcelona",country:"Poland"},
+{name:"Virgil van Dijk",rating:94,pos:"CB",club:"Liverpool",country:"Netherlands"},
+{name:"Alisson Becker",rating:93,pos:"GK",club:"Liverpool",country:"Brazil"},
+{name:"Thibaut Courtois",rating:94,pos:"GK",club:"Real Madrid",country:"Belgium"},
+{name:"Manuel Neuer",rating:93,pos:"GK",club:"Bayern Munich",country:"Germany"},
+{name:"Ruben Dias",rating:91,pos:"CB",club:"Manchester City",country:"Portugal"},
+{name:"Antonio Rudiger",rating:91,pos:"CB",club:"Real Madrid",country:"Germany"},
+{name:"Achraf Hakimi",rating:92,pos:"RB",club:"PSG",country:"Morocco"},
+{name:"Alphonso Davies",rating:91,pos:"LB",club:"Bayern Munich",country:"Canada"},
+{name:"Pedri",rating:92,pos:"CMF",club:"Barcelona",country:"Spain"},
+{name:"Federico Valverde",rating:93,pos:"CMF",club:"Real Madrid",country:"Uruguay"},
+{name:"Rodri",rating:94,pos:"DMF",club:"Manchester City",country:"Spain"},
+{name:"Bukayo Saka",rating:92,pos:"RW",club:"Arsenal",country:"England"},
+{name:"Phil Foden",rating:92,pos:"AMF",club:"Manchester City",country:"England"},
+{name:"Lautaro Martinez",rating:92,pos:"CF",club:"Inter",country:"Argentina"},
+{name:"Son Heung-min",rating:91,pos:"LW",club:"LAFC",country:"South Korea"},
+{name:"Bruno Fernandes",rating:91,pos:"AMF",club:"Manchester United",country:"Portugal"},
+{name:"Ederson",rating:91,pos:"GK",club:"Fenerbahce",country:"Brazil"},
+{name:"William Saliba",rating:91,pos:"CB",club:"Arsenal",country:"France"},
+
+{name:"Pele",rating:97,pos:"CF",club:"Legend",country:"Brazil"},
+{name:"Diego Maradona",rating:97,pos:"AMF",club:"Legend",country:"Argentina"},
+{name:"Ronaldo Nazario",rating:97,pos:"CF",club:"Legend",country:"Brazil"},
+{name:"Zinedine Zidane",rating:96,pos:"AMF",club:"Legend",country:"France"},
+{name:"Ronaldinho",rating:96,pos:"LW",club:"Legend",country:"Brazil"},
+{name:"Johan Cruyff",rating:96,pos:"CF",club:"Legend",country:"Netherlands"},
+{name:"Franz Beckenbauer",rating:96,pos:"CB",club:"Legend",country:"Germany"},
+{name:"Paolo Maldini",rating:96,pos:"CB",club:"Legend",country:"Italy"},
+{name:"Gianluigi Buffon",rating:96,pos:"GK",club:"Legend",country:"Italy"},
+{name:"Iker Casillas",rating:94,pos:"GK",club:"Legend",country:"Spain"},
+{name:"Xavi",rating:95,pos:"CMF",club:"Legend",country:"Spain"},
+{name:"Andres Iniesta",rating:95,pos:"CMF",club:"Legend",country:"Spain"},
+{name:"Andrea Pirlo",rating:94,pos:"DMF",club:"Legend",country:"Italy"},
+{name:"Roberto Carlos",rating:95,pos:"LB",club:"Legend",country:"Brazil"},
+{name:"Thierry Henry",rating:95,pos:"CF",club:"Legend",country:"France"},
+{name:"David Beckham",rating:94,pos:"RMF",club:"Legend",country:"England"},
+{name:"Steven Gerrard",rating:94,pos:"CMF",club:"Legend",country:"England"},
+{name:"Francesco Totti",rating:93,pos:"AMF",club:"Legend",country:"Italy"},
+{name:"Didier Drogba",rating:93,pos:"CF",club:"Legend",country:"Ivory Coast"},
+{name:"Carles Puyol",rating:94,pos:"CB",club:"Legend",country:"Spain"}
+];
+
+// =====================================
+// PLAYER IMAGES
+// =====================================
+
+const imageCache = {};
+
+function getPlayerImage(name) {
+  if (imageCache[name]) return imageCache[name];
+
+  const knownImages = {
+    "Lionel Messi":"https://commons.wikimedia.org/wiki/Special:FilePath/Lionel_Messi_20180626.jpg",
+    "Cristiano Ronaldo":"https://commons.wikimedia.org/wiki/Special:FilePath/Cristiano_Ronaldo_2018.jpg",
+    "Mohamed Salah":"https://commons.wikimedia.org/wiki/Special:FilePath/Mohamed_Salah_2018.jpg",
+    "Neymar Jr":"https://commons.wikimedia.org/wiki/Special:FilePath/Neymar_2018.jpg",
+    "Kylian Mbappe":"https://commons.wikimedia.org/wiki/Special:FilePath/Kylian_Mbapp%C3%A9_2019.jpg"
+  };
+
+  return knownImages[name] ||
+    "https://ui-avatars.com/api/?name=" +
+    encodeURIComponent(name) +
+    "&background=252019&color=e8bd62&size=300";
+}
+
+// =====================================
+// SAVE SYSTEM
+// =====================================
+
+function saveGame() {
+  localStorage.setItem("zg_coins",coins);
+  localStorage.setItem("zg_myTeam",JSON.stringify(myTeam));
+  localStorage.setItem("zg_mustafaTeam",JSON.stringify(mustafaTeam));
+  localStorage.setItem("zg_name",playerName);
+}
+
+function updateCoins() {
+  $("coinCount").textContent = coins;
+}
+
+function updatePlayerCount() {
+  $("myPlayerCount").textContent = myTeam.length;
+}
+
+// =====================================
+// NAVIGATION
+// =====================================
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  const page = $(id);
+  if (page) page.classList.add("active");
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// =====================================
+// PLAYER CARD
+// =====================================
+
+function playerCard(player) {
+  const card = document.createElement("div");
+  card.className = "player-card";
+
+  const img = document.createElement("img");
+  img.src = getPlayerImage(player.name);
+  img.alt = player.name;
+  img.loading = "lazy";
+
+  img.onerror = function() {
+    this.src = "https://ui-avatars.com/api/?name=" +
+      encodeURIComponent(player.name) +
+      "&background=252019&color=e8bd62&size=300";
+  };
+
+  const rating = document.createElement("div");
+  rating.className = "ovr";
+  rating.textContent = player.rating;
+
+  const name = document.createElement("h4");
+  name.textContent = player.name;
+
+  const details = document.createElement("p");
+  details.textContent = player.pos + " · " + player.club;
+
+  const country = document.createElement("p");
+  country.textContent = player.country;
+
+  card.append(img,rating,name,details,country);
+  return card;
+}
+
+// =====================================
+// TEAM DISPLAY
+// =====================================
+
+function renderTeam() {
+  renderPitch("myPlayers",myTeam);
+  renderPitch("mustafaPlayers",mustafaTeam);
+
+  updatePlayerCount();
+  saveGame();
+}
+
+function renderPitch(elementId,team) {
+  const container = $(elementId);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (team.length === 0) {
+    container.innerHTML =
+      "<p style='grid-column:1/-1;text-align:center;color:#fff'>لا يوجد لاعبون حتى الآن</p>";
+    return;
+  }
+
+  team.forEach(player => {
+    const slot = document.createElement("div");
+    slot.className = "pitch-slot";
+
+    const img = document.createElement("img");
+    img.src = getPlayerImage(player.name);
+    img.alt = player.name;
+
+    img.onerror = function() {
+      this.src = "https://ui-avatars.com/api/?name=" +
+        encodeURIComponent(player.name) +
+        "&background=252019&color=e8bd62";
+    };
+
+    const name = document.createElement("strong");
+    name.textContent = player.name;
+
+    const rating = document.createElement("small");
+    rating.textContent = player.rating + " · " + player.pos;
+
+    slot.append(img,name,rating);
+    container.appendChild(slot);
+  });
+}
+
+// =====================================
+// AUCTION SYSTEM
+// =====================================
+
+function selectAuctionMode(count,budget) {
+  if (auction.active) {
+    alert("المزاد شغال بالفعل!");
+    return;
+  }
+
+  auction = {
+    active:true,
+    playersPerTeam:count,
+    budget:budget,
+    myBudget:budget,
+    aiBudget:budget,
+    round:0,
+    currentPlayer:null,
+    bid:0,
+    ended:false
+  };
+
+  myTeam = [];
+  mustafaTeam = [];
+
+  $("auctionStatus").textContent =
+    "بدأ المزاد · " + count + " لاعبين لكل فريق";
+
+  startAuctionRound();
+}
+
+function randomPlayer() {
+  const index = Math.floor(Math.random()*PLAYER_DATABASE.length);
+  const source = PLAYER_DATABASE[index];
+
+  return {
+    ...source,
+    id:Date.now() + Math.random()
+  };
+}
+
+function startAuctionRound() {
+  if (!auction.active) return;
+
+  if (auction.round >= auction.playersPerTeam) {
+    finishAuction();
+    return;
+  }
+
+  auction.round++;
+  auction.currentPlayer = randomPlayer();
+  auction.bid = 1;
+
+  $("auctionInfo").textContent =
+    "الجولة " + auction.round +
+    " من " + auction.playersPerTeam +
+    " · السعر الحالي: " + auction.bid + "M";
+
+  $("auctionPlayer").innerHTML = "";
+  $("auctionPlayer").appendChild(playerCard(auction.currentPlayer));
+
+  $("auctionStatus").textContent =
+    "ميزانيتك: " + auction.myBudget +
+    "M · ميزانية المنافس: " + auction.aiBudget + "M";
+}
+
+function placeBid() {
+  if (!auction.active || !auction.currentPlayer) return;
+
+  const player = auction.currentPlayer;
+  const nextBid = auction.bid + 1;
+
+  if (nextBid > auction.myBudget) {
+    alert("ميزانيتك لا تكفي للمزايدة!");
+    return;
+  }
+
+  const aiLimit = Math.min(
+    auction.aiBudget,
+    Math.max(2,player.rating - 82)
+  );
+
+  const aiWins = nextBid > aiLimit ||
+    (Math.random() < 0.25 && nextBid >= 3);
+
+  if (aiWins) {
+    auction.aiBudget -= Math.min(aiLimit,auction.aiBudget);
+    mustafaTeam.push(player);
+
+    const replacement = randomPlayer();
+    myTeam.push(replacement);
+
+    const replacementCost = Math.min(1,auction.myBudget);
+    auction.myBudget -= replacementCost;
+
+    $("auctionInfo").textContent =
+      "المنافس فاز بـ " + player.name +
+      "، وأنت حصلت على " + replacement.name;
+
+  } else {
+    auction.bid = nextBid;
+    auction.myBudget -= nextBid;
+    myTeam.push(player);
+
+    const replacement = randomPlayer();
+    mustafaTeam.push(replacement);
+
+    const replacementCost = Math.min(1,auction.aiBudget);
+    auction.aiBudget -= replacementCost;
+
+    $("auctionInfo").textContent =
+      "أنت فزت بـ " + player.name +
+      "، والمنافس حصل على " + replacement.name;
+  }
+
+  renderTeam();
+
+  $("auctionStatus").textContent =
+    "ميزانيتك: " + auction.myBudget +
+    "M · ميزانية المنافس: " + auction.aiBudget + "M";
+
+  setTimeout(startAuctionRound,1800);
+}
+
+function passBid() {
+  if (!auction.active || !auction.currentPlayer) return;
+
+  const player = auction.currentPlayer;
+  const price = Math.min(auction.bid,auction.aiBudget);
+
+  if (price <= 0) {
+    alert("المنافس لا يمتلك ميزانية كافية!");
+    return;
+  }
+
+  auction.aiBudget -= price;
+  mustafaTeam.push(player);
+
+  const replacement = randomPlayer();
+  myTeam.push(replacement);
+
+  auction.myBudget -= Math.min(1,auction.myBudget);
+
+  $("auctionInfo").textContent =
+    "انسحبت من المزاد. المنافس حصل على " +
+    player.name + " وأنت حصلت على " + replacement.name;
+
+  renderTeam();
+  setTimeout(startAuctionRound,1800);
+}
+
+function finishAuction() {
+  auction.active = false;
+  auction.ended = true;
+
+  $("auctionInfo").textContent =
+    "انتهى المزاد! تم تكوين الفريقين.";
+
+  $("auctionStatus").textContent =
+    "انتهى المزاد بنجاح.";
+
+  renderTeam();
+  saveGame();
+}
+
+// =====================================
+// PACK SYSTEM
+// =====================================
+
+const PACKS = {
+  Silver:{cost:50,min:77,max:87},
+  Gold:{cost:100,min:82,max:92},
+  Special:{cost:180,min:88,max:96},
+  Legendary:{cost:300,min:92,max:97}
+};
+
+function openPack(type) {
+  const pack = PACKS[type];
+
+  if (!pack) return;
+
+  if (coins < pack.cost) {
+    alert("رصيدك لا يكفي لفتح هذا الباك!");
+    return;
+  }
+
+  coins -= pack.cost;
+  updateCoins();
+  saveGame();
+
+  const bag = $("packAnimation");
+  const result = $("packResult");
+
+  bag.classList.add("opening");
+  bag.textContent = "🎁";
+  result.innerHTML = "<p style='text-align:center;color:#e8bd62'>جاري فتح الباك...</p>";
+
+  setTimeout(() => {
+    bag.classList.remove("opening");
+    bag.textContent = "✨";
+
+    const possible = PLAYER_DATABASE.filter(player =>
+      player.rating >= pack.min &&
+      player.rating <= pack.max
+    );
+
+    const player = possible[
+      Math.floor(Math.random()*possible.length)
+    ];
+
+    const card = playerCard(player);
+
+    result.innerHTML = "";
+    result.appendChild(card);
+
+    myTeam.push(player);
+    renderTeam();
+    saveGame();
+
+  },1500);
+}
+
+// =====================================
+// PITCH SKINS
+// =====================================
+
+function changePitch(skin) {
+  const pitches = [
+    $("myPitch"),
+    $("mustafaPitch")
+  ];
+
+  let background = "";
+
+  if (skin === "green") {
+    background =
+      "repeating-linear-gradient(0deg,#174a2c,#174a2c 48px,#1b5633 48px,#1b5633 96px)";
+  }
+
+  if (skin === "blue") {
+    background =
+      "repeating-linear-gradient(0deg,#123d61,#123d61 48px,#19547d 48px,#19547d 96px)";
+  }
+
+  if (skin === "dark") {
+    background =
+      "repeating-linear-gradient(0deg,#252525,#252525 48px,#353535 48px,#353535 96px)";
+  }
+
+  pitches.forEach(pitch => {
+    pitch.style.background = background;
+  });
+}
+
+// =====================================
+// PROFILE
+// =====================================
+
+function saveProfile() {
+  const name = $("playerName").value.trim();
+
+  if (!name) {
+    alert("اكتب اسمك أولًا");
+    return;
+  }
+
+  playerName = name;
+  localStorage.setItem("zg_name",playerName);
+
+  $("profileStatus").textContent =
+    "تم حفظ اسمك: " + playerName;
+
+  saveGame();
+}
+
+// =====================================
+// LOCAL ROOM DEMO
+// =====================================
+
+function createRoom() {
+  const name = $("roomName").value.trim();
+
+  if (!name) {
+    alert("اكتب اسم الغرفة");
+    return;
+  }
+
+  const code = Math.random().toString(36)
+    .substring(2,7).toUpperCase();
+
+  $("roomStatus").textContent =
+    "تم إنشاء غرفة تجريبية: " + code;
+
+  $("roomCode").value = code;
+}
+
+function joinRoom() {
+  const code = $("roomCode").value.trim();
+
+  if (!code) {
+    alert("اكتب كود الغرفة");
+    return;
+  }
+
+  $("roomStatus").textContent =
+    "تم إدخال الكود " + code +
+    " في النسخة التجريبية. الغرف الأونلاين الحقيقية لم تُربط بعد.";
+}
+
+// =====================================
+// TOP 13 QUIZ
+// =====================================
+
+const QUESTIONS = [
+{
+  q:"أي منتخب فاز بكأس العالم 2022؟",
+  a:["فرنسا","الأرجنتين","البرازيل"],
+  correct:1
+},
+{
+  q:"من أكثر لاعب فاز بالكرة الذهبية حتى 2023؟",
+  a:["ميسي","رونالدو","زيدان"],
+  correct:0
+},
+{
+  q:"ما النادي الذي يلعب له محمد صلاح؟",
+  a:["ريال مدريد","ليفربول","برشلونة"],
+  correct:1
+},
+{
+  q:"كم لاعبًا في الفريق داخل الملعب؟",
+  a:["10","11","12"],
+  correct:1
+},
+{
+  q:"من فاز بكأس العالم 2018؟",
+  a:["فرنسا","كرواتيا","ألمانيا"],
+  correct:0
+}
+];
+
+let quizIndex = 0;
+let quizScore = 0;
+
+function startQuiz() {
+  quizIndex = 0;
+  quizScore = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  const area = $("quizArea");
+
+  if (quizIndex >= QUESTIONS.length) {
+    area.innerHTML =
+      "<h3>انتهى التحدي!</h3><p>نتيجتك: " +
+      quizScore + " من " + QUESTIONS.length +
+      "</p>";
+    return;
+  }
+
+  const question = QUESTIONS[quizIndex];
+
+  area.innerHTML = "";
+
+  const title = document.createElement("h3");
+  title.textContent =
+    (quizIndex+1) + ". " + question.q;
+
+  area.appendChild(title);
+
+  question.a.forEach((answer,index) => {
+    const button = document.createElement("button");
+
+    button.className = "dark-btn";
+    button.style.display = "block";
+    button.style.width = "100%";
+    button.style.margin = "8px 0";
+    button.textContent = answer;
+
+    button.onclick = () => {
+      if (index === question.correct) {
+        quizScore++;
+        button.textContent += " ✓";
+      } else {
+        button.textContent += " ✕";
+      }
+
+      quizIndex++;
+      setTimeout(showQuestion,700);
+    };
+
+    area.appendChild(button);
+  });
+}
+
+// =====================================
+// INITIALIZATION
+// =====================================
+
+function initializeGame() {
+  updateCoins();
+  updatePlayerCount();
+  renderTeam();
+
+  $("playerName").value = playerName;
+
+  $("profileStatus").textContent =
+    "مرحبًا بك في ZIZO GAMES";
+
+  console.log("ZIZO GAMES loaded successfully");
+}
+
+initializeGame();
+
+</script>
+
+</body>
+  </html>
