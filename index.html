@@ -1,1 +1,143 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZIZO GAMES PACK OPENING</title>
+<style>
+body{margin:0;background:#101725;color:white;font-family:Arial;text-align:center}
+header{padding:25px;background:#18283c}
+h1{color:#e9bd5a}
+main{max-width:800px;margin:auto;padding:15px}
+.box{background:#1b293b;padding:18px;margin:15px 0;border-radius:15px}
+button,select{padding:13px;margin:5px;border:0;border-radius:10px;font-weight:bold}
+button{background:#e9bd5a;cursor:pointer}
+.pack{background:#293d56;color:white;min-width:90px}
+.active{outline:3px solid #e9bd5a}
+.cards{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.card{background:linear-gradient(#385574,#172333);padding:20px;border-radius:15px;width:130px}
+.rating{font-size:30px;color:#e9bd5a;font-weight:bold}
+.muted{color:#aab7c8}
+</style>
+</head>
+<body>
+<header>
+<h1>ZIZO GAMES</h1>
+<h2>PACK OPENING ⚽</h2>
+<p>افتح الباكيج واكتشف حظك!</p>
+</header>
+<main>
+<div class="box">
+<h2>🪙 الكوينز: <span id="coins">500</span></h2>
+<h3>اللاعبون المتبقون: <span id="remaining">12</span></h3>
+<h3>اللاعبون المفتوحون: <span id="opened">0</span></h3>
+</div>
+<h2>اختار الباكيج</h2>
+<button class="pack active" onclick="choose('silver',this)">🥈 Silver<br>5 كوينز</button>
+<button class="pack" onclick="choose('gold',this)">🥇 Gold<br>12 كوينز</button>
+<button class="pack" onclick="choose('legendary',this)">👑 Legendary<br>30 كوينز</button>
+<div class="box">
+<h3>عدد اللاعبين</h3>
+<select id="qty" onchange="update()">
+<option value="1">لاعب واحد</option>
+<option value="2">لاعبان</option>
+<option value="5">5 لاعبين</option>
+<option value="11">11 لاعبًا</option>
+</select>
+<p id="cost">التكلفة: 5 كوينز</p>
+<button onclick="openPack()">افتح الباكيج 🎁</button>
+<button onclick="reset()">إعادة ضبط اللاعبين</button>
+<button onclick="resetCoins()">إعادة الكوينز</button>
+</div>
+<h2>نتيجة الفتح</h2>
+<div id="results" class="cards"></div>
+<div class="box">
+<h3>سجل السحوبات</h3>
+<div id="history" class="muted">لا توجد سحوبات.</div>
+</div>
+</main>
+<script>
+const original={
+silver:[
+["محمد صلاح",90,"Elite"],["سون",88,"Good"],
+["ساكا",87,"Good"],["فان دايك",89,"Elite"],
+["دي بروين",91,"Legendary"],["برونو",86,"Good"],
+["كول بالمر",86,"Good"],["إيدرسون",88,"Good"],
+["ديكلان رايس",87,"Good"],["داروين نونيز",82,"Normal"],
+["أنتوني",78,"Bad"],["ماغواير",79,"Bad"]],
+gold:[
+["رونالدو",94,"Legendary"],["هنري",95,"Legendary"],
+["زيدان",96,"Legendary"],["رونالدينيو",96,"Legendary"],
+["مبابي",93,"Elite"],["هالاند",92,"Elite"],
+["مودريتش",92,"Elite"],["إنييستا",94,"Legendary"],
+["تشافي",93,"Legendary"],["بنزيما",91,"Elite"],
+["راموس",90,"Good"],["نيمار",92,"Elite"]],
+legendary:[
+["ميسي",99,"Legendary"],["بيليه",99,"Legendary"],
+["مارادونا",99,"Legendary"],["رونالدو نازاريو",98,"Legendary"],
+["بيكنباور",97,"Legendary"],["مالديني",97,"Legendary"],
+["كرويف",98,"Legendary"],["غارينشا",96,"Legendary"],
+["أوزيبيو",96,"Legendary"],["ياشين",97,"Legendary"],
+["كاكا",93,"Elite"],["بيرلو",93,"Elite"]]
+};
+let pack="silver";
+let coins=500;
+let stock=JSON.parse(JSON.stringify(original));
+let history=[];
+function choose(p,b){
+pack=p;
+document.querySelectorAll(".pack").forEach(x=>x.classList.remove("active"));
+b.classList.add("active");
+update();
+}
+function update(){
+let n=Number(document.getElementById("qty").value);
+document.getElementById("cost").textContent="التكلفة: "+n*({silver:5,gold:12,legendary:30}[pack])+" كوينز";
+document.getElementById("coins").textContent=coins;
+document.getElementById("remaining").textContent=stock[pack].length;
+document.getElementById("opened").textContent=history.length;
+document.getElementById("history").innerHTML=history.slice().reverse().join("<br>")||"لا توجد سحوبات.";
+}
+function openPack(){
+let n=Number(document.getElementById("qty").value);
+let price=n*({silver:5,gold:12,legendary:30}[pack]);
+if(stock[pack].length<n)return alert("اللاعبون المتبقون لا يكفون!");
+if(coins<price)return alert("الكوينز غير كافية!");
+coins-=price;
+let got=[];
+for(let i=0;i<n;i++){
+let index=Math.floor(Math.random()*stock[pack].length);
+let p=stock[pack].splice(index,1)[0];
+got.push(p);
+history.push(p[0]+" — "+p[1]+" ("+p[2]+")");
+}
+document.getElementById("results").innerHTML=got.map(p=>
+'<div class="card"><div style="font-size:35px">⚽</div><div class="rating">'+p[1]+'</div><h3>'+p[0]+'</h3><p>'+p[2]+'</p></div>'
+).join("");
+save();
+update();
+}
+function save(){
+localStorage.setItem("zizoCoins",coins);
+localStorage.setItem("zizoStock",JSON.stringify(stock));
+localStorage.setItem("zizoHistory",JSON.stringify(history));
+}
+function reset(){
+if(confirm("إعادة كل اللاعبين؟")){
+stock=JSON.parse(JSON.stringify(original));
+history=[];
+save();
+document.getElementById("results").innerHTML="";
+update();
+}
+}
+function resetCoins(){
+coins=500;save();update();
+}
+coins=Number(localStorage.getItem("zizoCoins")??500);
+stock=JSON.parse(localStorage.getItem("zizoStock")||"null")||stock;
+history=JSON.parse(localStorage.getItem("zizoHistory")||"[]");
+update();
+</script>
+</body>
+</html>
