@@ -621,5 +621,204 @@ updateUI();
 renderTeam();
 renderAuction();
 </script>
+  <style>
+.zg-player-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    display: block;
+}
+
+.zg-player-loading {
+    opacity: 0.65;
+    filter: blur(1px);
+}
+
+.zg-pack-reveal {
+    animation: zgReveal .65s ease both;
+}
+
+@keyframes zgReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(25px) scale(.85);
+    }
+    70% {
+        transform: translateY(-5px) scale(1.03);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.zg-image-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 25px;
+    font-weight: bold;
+    color: #d6ad45;
+}
+</style>
+
+<script>
+(function () {
+    "use strict";
+
+    const imageCache = {};
+
+    const playerEnglishNames = {
+        "محمد صلاح": "Mohamed Salah",
+        "ليونيل ميسي": "Lionel Messi",
+        "كريستيانو رونالدو": "Cristiano Ronaldo",
+        "نيمار": "Neymar",
+        "كيليان مبابي": "Kylian Mbappe",
+        "إيرلينج هالاند": "Erling Haaland",
+        "هاري كين": "Harry Kane",
+        "فينيسيوس": "Vinicius Junior",
+        "رونالدو نازاريو": "Ronaldo Nazario",
+        "بيليه": "Pele",
+        "مارادونا": "Diego Maradona",
+        "زيدان": "Zinedine Zidane",
+        "رونالدينيو": "Ronaldinho",
+        "مالديني": "Paolo Maldini",
+        "بوفون": "Gianluigi Buffon",
+        "تشافي": "Xavi",
+        "إنييستا": "Andres Iniesta",
+        "بيرلو": "Andrea Pirlo",
+        "لامبارد": "Frank Lampard",
+        "بويول": "Carles Puyol",
+        "فان دايك": "Virgil van Dijk",
+        "كاسياس": "Iker Casillas",
+        "كورتوا": "Thibaut Courtois",
+        "أوزيل": "Mesut Ozil",
+        "كاكا": "Kaka",
+        "بيكهام": "David Beckham",
+        "روبرتو كارلوس": "Roberto Carlos"
+    };
+
+    async function getPlayerImage(playerName) {
+        if (imageCache[playerName]) {
+            return imageCache[playerName];
+        }
+
+        const englishName =
+            playerEnglishNames[playerName] || playerName;
+
+        try {
+            const searchUrl =
+                "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=" +
+                encodeURIComponent(englishName) +
+                "&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&origin=*";
+
+            const response = await fetch(searchUrl);
+
+            if (!response.ok) {
+                throw new Error("Image request failed");
+            }
+
+            const data = await response.json();
+            const pages = data.query && data.query.pages;
+
+            if (!pages) {
+                throw new Error("No image found");
+            }
+
+            const page = Object.values(pages)[0];
+            const image =
+                page.thumbnail && page.thumbnail.source;
+
+            if (!image) {
+                throw new Error("No image found");
+            }
+
+            imageCache[playerName] = image;
+            return image;
+
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async function addImageToCard(card) {
+        if (card.dataset.zgImageReady) return;
+
+        const avatar = card.querySelector(".avatar");
+        if (!avatar) return;
+
+        const cardText = card.innerText || "";
+        let playerName = "";
+
+        if (typeof playerPool !== "undefined") {
+            const found = playerPool.find(player =>
+                cardText.includes(player[0])
+            );
+
+            if (found) playerName = found[0];
+        }
+
+        if (!playerName) return;
+
+        card.dataset.zgImageReady = "loading";
+        avatar.classList.add("zg-player-loading");
+
+        const imageUrl = await getPlayerImage(playerName);
+
+        avatar.classList.remove("zg-player-loading");
+
+        if (imageUrl) {
+            avatar.innerHTML = "";
+
+            const img = document.createElement("img");
+            img.src = imageUrl;
+            img.alt = playerName;
+            img.className = "zg-player-image";
+
+            img.onerror = function () {
+                avatar.innerHTML =
+                    '<span class="zg-image-fallback">' +
+                    playerName.charAt(0) +
+                    '</span>';
+            };
+
+            avatar.appendChild(img);
+        }
+
+        card.dataset.zgImageReady = "yes";
+    }
+
+    function scanCards() {
+        document.querySelectorAll(".player").forEach(card => {
+            if (!card.classList.contains("zg-pack-reveal")) {
+                card.classList.add("zg-pack-reveal");
+            }
+
+            addImageToCard(card);
+        });
+    }
+
+    const observer = new MutationObserver(scanCards);
+
+    function start() {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        scanCards();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", start);
+    } else {
+        start();
+    }
+
+})();
+</script>
 </body>
 </html>
