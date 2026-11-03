@@ -1,1 +1,509 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090909">
+<title>ZIZO GAMES</title>
+<style>
+:root{--g:#e8bd55;--p:#191919}
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#fff;font-family:Tahoma,Arial}
+header{text-align:center;padding:18px;background:#111;border-bottom:1px solid #76591f}
+.logo{font-size:28px;font-weight:bold;color:var(--g)}
+main{max-width:950px;margin:auto;padding:14px}
+.card{background:var(--p);border:1px solid #59451e;border-radius:15px;padding:15px;margin:12px 0}
+h2,h3{color:var(--g)}
+input,select,button{width:100%;padding:12px;margin:5px 0;border-radius:9px;border:1px solid #555;background:#101010;color:white;font:inherit}
+button{background:linear-gradient(120deg,#f4d276,#b18129);color:#17120a;font-weight:bold;border:0}
+button.alt{background:#333;color:white;border:1px solid #666}
+.row,.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}
+.hidden{display:none}
+.muted{color:#aaa;font-size:13px}
+.pill{color:var(--g);border:1px solid #76591f;border-radius:20px;padding:6px;margin:3px;display:inline-block}
+.player,.result{border:1px solid #76591f;border-radius:10px;padding:12px;margin:8px 0}
+.player{text-align:center;background:#222}
+.player b{color:var(--g)}
+nav{display:flex;gap:5px;overflow:auto}
+nav button{min-width:95px}
+footer{text-align:center;color:#777;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">⚽ ZIZO GAMES</div>
+<small>العب • كوّن فريقك • نافس أصحابك</small>
+</header>
 
+<main>
+<div id="auth" class="card">
+<h2>الدخول إلى ZIZO GAMES</h2>
+<p>اكتب إيميلك وسنرسل لك رابط دخول آمن. لا تحتاج إلى كلمة مرور.</p>
+<input id="email" type="email" autocomplete="email" placeholder="اكتب الإيميل">
+<input id="username" placeholder="اسم اللاعب (عند أول تسجيل فقط)">
+<button id="sendlink">إرسال رابط الدخول إلى الإيميل</button>
+<p id="authmsg" class="muted"></p>
+</div>
+
+<div id="app" class="hidden">
+<div class="card">
+<h2 id="welcome">أهلاً</h2>
+<span class="pill">🪙 <b id="coins">500</b></span>
+<span class="pill">🏆 <b id="points">0</b></span>
+<button id="logout" class="alt">خروج</button>
+</div>
+
+<nav>
+<button data-page="home">الرئيسية</button>
+<button data-page="packs">الباكات</button>
+<button data-page="match">المحاكاة</button>
+<button data-page="auction">المزاد</button>
+<button data-page="million">مزاد المليون</button>
+<button data-page="top">Top 13</button>
+<button data-page="target">Target</button>
+<button data-page="friends">الأصدقاء</button>
+<button data-page="rank">الترتيب</button>
+</nav>
+
+<section id="home" class="page card">
+<h2>مرحباً بك في ZIZO GAMES</h2>
+<p>كل الألعاب والعملات هنا افتراضية للتسلية.</p>
+<div class="grid">
+<div class="player">PACK OPENING</div>
+<div class="player">MATCH SIMULATOR</div>
+<div class="player">AUCTION</div>
+<div class="player">AUCTION MILLION</div>
+<div class="player">TOP 13</div>
+<div class="player">TARGET</div>
+</div>
+</section>
+
+<section id="packs" class="page card hidden">
+<h2>PACK OPENING</h2>
+<div class="row">
+<button onclick="pack(5)">باقة عادية 5</button>
+<button onclick="pack(20)">باقة مميزة 20</button>
+<button onclick="pack(40)">باقة أسطورية 40</button>
+</div>
+<div id="packout" class="result"></div>
+<h3>مجموعتك</h3>
+<div id="inventory"></div>
+</section>
+
+<section id="match" class="page card hidden">
+<h2>محاكاة المباراة</h2>
+<div class="row">
+<input id="team1" value="ZIZO FC">
+<select id="opponentMode">
+<option value="friend">العب ضد لاعب آخر</option>
+<option value="ai">العب ضد الذكاء الاصطناعي 🤖</option>
+</select>
+</div>
+<div class="row">
+<input id="team2" value="المنافس">
+<select id="aiLevel">
+<option value="easy">الذكاء الاصطناعي — سهل</option>
+<option value="medium" selected>الذكاء الاصطناعي — متوسط</option>
+<option value="hard">الذكاء الاصطناعي — صعب</option>
+</select>
+</div>
+<div class="row">
+<select id="formation1">
+<option>4-3-3</option>
+<option>4-2-3-1</option>
+<option>4-4-2</option>
+<option>3-5-2</option>
+</select>
+<select id="formation2">
+<option>4-3-3</option>
+<option>4-2-3-1</option>
+<option>4-4-2</option>
+<option>3-5-2</option>
+</select>
+</div>
+<button onclick="match()">ابدأ المباراة</button>
+<div id="matchout" class="result"></div>
+</section>
+
+<section id="auction" class="page card hidden">
+<h2>AUCTION</h2>
+<select id="size">
+<option value="5">5 لاعبين — 100 مليون</option>
+<option value="7">7 لاعبين — 150 مليون</option>
+<option value="11">11 لاعب — 200 مليون</option>
+</select>
+<button onclick="auction(false)">ابدأ المزاد</button>
+<div id="auctionout"></div>
+</section>
+
+<section id="million" class="page card hidden">
+<h2>AUCTION MILLION</h2>
+<p>كوّن 18 لاعباً: 11 أساسي و7 بدلاء. ميزانية افتراضية 500 مليون.</p>
+<button onclick="auction(true)">ابدأ المزاد</button>
+<div id="millionout"></div>
+</section>
+
+<section id="top" class="page card hidden">
+<h2>TOP 13 — أسئلة كروية</h2>
+<div id="question" class="result"></div>
+<button onclick="newQ()">سؤال جديد</button>
+</section>
+
+<section id="target" class="page card hidden">
+<h2>TARGET</h2>
+<p>خمن الرقم من 1 إلى 100.</p>
+<input id="guess" type="number" min="1" max="100">
+<button onclick="checkGuess()">تحقق</button>
+<div id="targetout" class="result"></div>
+</section>
+
+<section id="friends" class="page card hidden">
+<h2>الأصدقاء</h2>
+<p class="muted">ابحث باسم اللاعب، وليس بإيميله.</p>
+<input id="friendname" placeholder="Username">
+<button onclick="sendRequest()">إرسال طلب صداقة</button>
+<div id="friendmsg" class="result"></div>
+<h3>طلبات واردة</h3>
+<div id="incoming"></div>
+<h3>طلبات أرسلتها</h3>
+<div id="outgoing"></div>
+<h3>أصدقائي</h3>
+<div id="friendlist"></div>
+</section>
+
+<section id="rank" class="page card hidden">
+<h2>الترتيب</h2>
+<p class="muted">ترتيب تجريبي محلي. الترتيب المشترك الآمن يحتاج اعتماد النتائج من الخادم.</p>
+<div id="rankout"></div>
+</section>
+</div>
+
+<p id="status" class="muted"></p>
+</main>
+<footer>ZIZO GAMES — نسخة أولية</footer>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import{getAuth,sendSignInLinkToEmail,isSignInWithEmailLink,signInWithEmailLink,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import{getFirestore,doc,setDoc,getDoc,collection,query,where,getDocs,addDoc,updateDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const cfg={
+apiKey:"AIzaSyC1xSsdqiuoaVOJQwrLRweLdgmBu3F1PUQ",
+authDomain:"zizo-games.firebaseapp.com",
+projectId:"zizo-games",
+storageBucket:"zizo-games.firebasestorage.app",
+messagingSenderId:"391985230842",
+appId:"1:391985230842:web:4d92b77226467c226e2a43"
+};
+
+const fb=initializeApp(cfg);
+const auth=getAuth(fb);
+const db=getFirestore(fb);
+const $=x=>document.getElementById(x);
+
+let me=null,profile={},coins=500,points=0,players=[],target=Math.ceil(Math.random()*100);
+
+const pool=[
+["Messi","RW",94,25],["Cristiano Ronaldo","CF",93,24],
+["Mbappé","CF",92,23],["Haaland","CF",91,22],
+["Salah","RW",90,20],["Neymar","LW",90,20],
+["De Bruyne","AMF",91,21],["Bellingham","CMF",90,20],
+["Pedri","CMF",88,17],["Rodri","DMF",91,21],
+["Vinícius Jr","LW",91,21],["Van Dijk","CB",90,20],
+["Maldini","CB",94,25],["Rúben Dias","CB",89,18],
+["Hakimi","RB",88,17],["Alisson","GK",90,20],
+["Buffon","GK",92,22],["Ronaldinho","AMF",93,23],
+["Zidane","AMF",96,28],["Ronaldo Nazário","CF",95,27]
+];
+
+function msg(t){$("status").textContent=t}
+
+function err(e){
+return e.code==="auth/unauthorized-domain"
+?"أضف elzoz0914-cpu.github.io في Firebase > Authentication > Settings > Authorized domains."
+:e.code==="permission-denied"
+?"قواعد Firestore لا تسمح بالعملية؛ راجع قواعد الأمان."
+:e.message;
+}
+
+function save(){
+if(!me)return;
+localStorage.setItem("zizo_"+me.uid,JSON.stringify({coins,points,players}));
+$("coins").textContent=coins;
+$("points").textContent=points;
+}
+
+function load(){
+let d=JSON.parse(localStorage.getItem("zizo_"+me.uid)||"{}");
+coins=d.coins??500;
+points=d.points??0;
+players=d.players||[];
+save();
+renderPlayers();
+}
+
+const actionCodeSettings={
+url:location.origin+location.pathname,
+handleCodeInApp:true
+};
+
+$("sendlink").onclick=async()=>{
+try{
+let email=$("email").value.trim();
+if(!email)throw Error("اكتب الإيميل أولاً.");
+let name=$("username").value.trim();
+if(name&&name.length<3)throw Error("اسم اللاعب يجب أن يكون 3 أحرف على الأقل.");
+if(name)localStorage.setItem("zizo_pending_name",name);
+localStorage.setItem("zizo_email_for_signin",email);
+await sendSignInLinkToEmail(auth,email,actionCodeSettings);
+$("authmsg").textContent="بعتنالك رابط الدخول. افتح رسالة Firebase واضغط الرابط من نفس الجهاز.";
+}catch(e){
+$("authmsg").textContent=err(e);
+}
+};
+
+async function finishEmailLink(){
+if(isSignInWithEmailLink(auth,location.href)){
+let email=localStorage.getItem("zizo_email_for_signin")||prompt("اكتب نفس الإيميل الذي استلم رابط الدخول:");
+if(!email){
+$("authmsg").textContent="لازم تدخل نفس الإيميل لإكمال تسجيل الدخول.";
+return;
+}
+try{
+let c=await signInWithEmailLink(auth,email,location.href);
+localStorage.removeItem("zizo_email_for_signin");
+history.replaceState({},document.title,location.pathname);
+let ref=doc(db,"users",c.user.uid);
+let snap=await getDoc(ref);
+if(!snap.exists()){
+let name=localStorage.getItem("zizo_pending_name")||"لاعب";
+await setDoc(ref,{
+displayName:name,
+usernameLower:name.toLowerCase(),
+email:c.user.email,
+createdAt:serverTimestamp()
+});
+localStorage.removeItem("zizo_pending_name");
+}
+}catch(e){
+$("authmsg").textContent=err(e);
+}
+}
+}
+
+$("logout").onclick=()=>signOut(auth);
+
+await finishEmailLink();
+
+onAuthStateChanged(auth,async u=>{
+me=u;
+if(u){
+$("auth").classList.add("hidden");
+$("app").classList.remove("hidden");
+try{
+let s=await getDoc(doc(db,"users",u.uid));
+profile=s.data()||{};
+$("welcome").textContent="أهلاً "+(profile.displayName||"لاعب");
+load();
+page("home");
+friends();
+}catch(e){
+msg(err(e));
+}
+}else{
+$("auth").classList.remove("hidden");
+$("app").classList.add("hidden");
+}
+});
+
+function page(id){
+document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
+$(id).classList.remove("hidden");
+if(id==="friends")friends();
+if(id==="rank")rank();
+}
+
+document.querySelectorAll("[data-page]").forEach(b=>{
+b.onclick=()=>page(b.dataset.page);
+});
+
+window.pack=cost=>{
+if(coins<cost)return $("packout").textContent="رصيدك غير كافٍ.";
+coins-=cost;
+let n=cost===5?1:cost===20?3:5,got=[];
+for(let i=0;i<n;i++){
+let p=pool.filter(x=>!players.some(y=>y[0]===x[0]));
+if(!p.length)break;
+let x=p[Math.floor(Math.random()*p.length)];
+players.push(x);
+got.push(x);
+}
+$("packout").textContent=got.map(x=>`${x[0]} — ${x[1]} — ${x[2]}`).join("\n")||"جمعت كل اللاعبين!";
+save();
+renderPlayers();
+};
+
+function renderPlayers(){
+$("inventory").innerHTML=players.map(x=>`<div class="player"><b>${x[0]}</b><br>${x[1]} • ${x[2]}</div>`).join("")||"المجموعة فارغة.";
+}
+
+window.match=()=>{
+let ai=$("opponentMode").value==="ai";
+let level=$("aiLevel").value;
+let a=Math.floor(Math.random()*4),b=Math.floor(Math.random()*4);
+if(ai){
+let boost=level==="easy"?-1:level==="hard"?2:0;
+b=Math.max(0,Math.min(5,Math.floor(Math.random()*4)+boost));
+$("team2").value="ZIZO AI 🤖";
+}
+$("matchout").textContent=`${$("team1").value} ${a} - ${b} ${$("team2").value}
+${$("formation1").value} ضد ${$("formation2").value}
+
+أحداث المباراة:
+12' فرصة خطيرة
+34' تصدي رائع
+61' هجمة منظمة
+78' تسديدة على المرمى
+
+${ai?"المنافس: ذكاء اصطناعي ("+level+")":"مباراة تجريبية"}`;
+if(a>b){points+=3;coins+=20}
+else if(a===b){points++;coins+=10}
+else coins+=5;
+save();
+};
+
+window.auction=big=>{
+let n=big?18:+$("size").value;
+let budget=big?500:n===5?100:n===7?150:200;
+let chosen=[],spent=0;
+let box=$(big?"millionout":"auctionout");
+
+function step(){
+if(chosen.length>=n){
+box.innerHTML=`<div class="result">اكتمل الفريق (${n} لاعب). المصروف ${spent}م والمتبقي ${budget-spent}م.<br>${chosen.map(x=>x[0]).join(" • ")}</div>`;
+return;
+}
+let available=pool.filter(x=>!chosen.includes(x)&&spent+x[3]<=budget);
+if(!available.length){
+box.textContent="الميزانية لا تكفي لإكمال الفريق.";
+return;
+}
+let p=available[Math.floor(Math.random()*available.length)];
+box.innerHTML=`<div class="player"><b>${p[0]}</b><br>${p[1]} • تقييم ${p[2]}<br>السعر ${p[3]} مليون</div>
+<p>المتبقي ${budget-spent} مليون — اللاعب ${chosen.length+1}/${n}</p>
+<button id="buy">ضم اللاعب</button>
+<button id="skip" class="alt">تخطي</button>
+<p>${chosen.map(x=>x[0]).join(" • ")}</p>`;
+box.querySelector("#buy").onclick=()=>{
+chosen.push(p);
+spent+=p[3];
+step();
+};
+box.querySelector("#skip").onclick=step;
+}
+step();
+};
+
+const qs=[
+["كم لاعباً في الفريق الأساسي؟",["9","10","11","12"],2],
+["كم دقيقة زمن المباراة الأصلي؟",["80","90","100","120"],1],
+["من يلعب بالقفازات غالباً؟",["المهاجم","حارس المرمى","الجناح","الوسط"],1],
+["ما البطولة الأوروبية الأشهر للأندية؟",["كوبا أمريكا","دوري الأبطال","أمم أفريقيا","كأس آسيا"],1]
+];
+
+let qi=0;
+
+window.newQ=()=>{
+qi=Math.floor(Math.random()*qs.length);
+let q=qs[qi];
+$("question").innerHTML=`<b>${q[0]}</b><div class="grid">${q[1].map((a,i)=>`<button class="alt" data-i="${i}">${a}</button>`).join("")}</div>`;
+$("question").querySelectorAll("[data-i]").forEach(b=>{
+b.onclick=()=>{
+if(+b.dataset.i===q[2]){
+points++;
+coins+=2;
+save();
+$("question").innerHTML+="<p>إجابة صحيحة! +1 نقطة</p>";
+}else{
+$("question").innerHTML+="<p>إجابة غير صحيحة. جرّب سؤالاً آخر.</p>";
+}
+};
+});
+};
+
+newQ();
+
+window.checkGuess=()=>{
+let g=+$("guess").value;
+if(g===target){
+$("targetout").textContent="ممتاز! أصبت الرقم +5 نقاط";
+points+=5;
+coins+=5;
+target=Math.ceil(Math.random()*100);
+save();
+}else{
+$("targetout").textContent=g<target?"جرّب رقم أكبر":"جرّب رقم أصغر";
+}
+};
+
+window.sendRequest=async()=>{
+try{
+let n=$("friendname").value.trim().toLowerCase();
+let s=await getDocs(query(collection(db,"users"),where("usernameLower","==",n)));
+if(s.empty)throw Error("لا يوجد لاعب بهذا الاسم.");
+let u=s.docs[0];
+if(u.id===me.uid)throw Error("لا يمكنك إضافة نفسك.");
+await addDoc(collection(db,"friendRequests"),{
+from:me.uid,
+to:u.id,
+fromName:profile.displayName,
+toName:u.data().displayName,
+status:"pending",
+createdAt:serverTimestamp()
+});
+$("friendmsg").textContent="تم إرسال الطلب.";
+friends();
+}catch(e){
+$("friendmsg").textContent=err(e);
+}
+};
+
+window.answerRequest=async(id,yes)=>{
+try{
+await updateDoc(doc(db,"friendRequests",id),{status:yes?"accepted":"rejected"});
+friends();
+}catch(e){
+msg(err(e));
+}
+};
+
+async function friends(){
+if(!me)return;
+try{
+let a=await getDocs(query(collection(db,"friendRequests"),where("to","==",me.uid)));
+let b=await getDocs(query(collection(db,"friendRequests"),where("from","==",me.uid)));
+$("incoming").innerHTML=a.docs.filter(d=>d.data().status==="pending").map(d=>
+`<div class="result">${d.data().fromName}
+<button onclick="answerRequest('${d.id}',true)">قبول</button>
+<button class="alt" onclick="answerRequest('${d.id}',false)">رفض</button></div>`
+).join("")||"لا توجد طلبات.";
+
+$("outgoing").innerHTML=b.docs.filter(d=>d.data().status==="pending").map(d=>
+`<div class="result">${d.data().toName} — قيد الانتظار</div>`
+).join("")||"لا توجد طلبات معلقة.";
+
+let accepted=[...a.docs,...b.docs].filter(d=>d.data().status==="accepted");
+$("friendlist").innerHTML=accepted.map(d=>
+`<div class="result">${d.data().from===me.uid?d.data().toName:d.data().fromName}</div>`
+).join("")||"لا يوجد أصدقاء بعد.";
+}catch(e){
+$("friendmsg").textContent=err(e);
+}
+}
+
+function rank(){
+$("rankout").textContent=`${profile.displayName||"أنت"} — ${points} نقطة — ${coins} عملة (محلياً)`;
+}
+</script>
+</body>
+  </html>
