@@ -1,1 +1,627 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090909">
+<title>ZIZO GAMES</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --gold:#e8bd62;
+  --gold2:#ffe5a1;
+  --black:#080808;
+  --panel:#151515;
+  --muted:#999;
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  background:#080808;
+  color:white;
+  font-family:'Cairo',sans-serif;
+  min-height:100vh;
+}
+
+button {
+  font-family:inherit;
+  cursor:pointer;
+}
+
+.app {
+  max-width:1100px;
+  margin:auto;
+  padding:15px;
+}
+
+header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:15px 5px;
+  border-bottom:1px solid #34302a;
+}
+
+.logo {
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:1px;
+  color:var(--gold);
+}
+
+.logo span {
+  color:white;
+}
+
+.coins {
+  background:#1c1912;
+  border:1px solid #8c6d35;
+  padding:7px 13px;
+  border-radius:30px;
+  color:var(--gold2);
+  font-weight:bold;
+  font-size:13px;
+}
+
+.hero {
+  margin-top:20px;
+  padding:28px 20px;
+  border:1px solid #765b2e;
+  border-radius:20px;
+  background:
+  radial-gradient(ellipse at 85% 10%,#70501d55,transparent 45%),
+  linear-gradient(135deg,#242019,#101010 65%);
+  position:relative;
+  overflow:hidden;
+}
+
+.hero small {
+  color:var(--gold);
+  letter-spacing:3px;
+  font-weight:bold;
+}
+
+.hero h1 {
+  font-size:35px;
+  line-height:1.5;
+  margin-top:8px;
+}
+
+.hero h1 span {
+  color:var(--gold);
+}
+
+.hero p {
+  color:#bbb;
+  font-size:13px;
+  margin-top:8px;
+}
+
+.hero-tag {
+  display:inline-block;
+  margin-top:18px;
+  padding:8px 17px;
+  border-radius:30px;
+  background:linear-gradient(120deg,#a77b32,#f5d78f);
+  color:#17110a;
+  font-weight:900;
+  font-size:12px;
+}
+
+.section-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:27px 2px 13px;
+}
+
+.section-title h2 {
+  font-size:19px;
+}
+
+.section-title span {
+  color:var(--gold);
+  font-size:11px;
+  letter-spacing:2px;
+}
+
+.menu-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.menu-card {
+  min-height:125px;
+  background:linear-gradient(145deg,#202020,#111);
+  border:1px solid #38332a;
+  border-radius:16px;
+  padding:17px;
+  text-align:right;
+  position:relative;
+  overflow:hidden;
+  transition:.2s;
+}
+
+.menu-card:active {
+  transform:scale(.97);
+  border-color:var(--gold);
+}
+
+.menu-card .icon {
+  font-size:27px;
+  margin-bottom:7px;
+}
+
+.menu-card h3 {
+  font-size:16px;
+  color:var(--gold2);
+}
+
+.menu-card p {
+  color:#999;
+  font-size:11px;
+  margin-top:3px;
+}
+
+.menu-card::after {
+  content:"";
+  position:absolute;
+  width:80px;
+  height:80px;
+  border:1px solid #d2a64b22;
+  border-radius:50%;
+  left:-25px;
+  bottom:-35px;
+}
+
+.page {
+  display:none;
+  margin-top:22px;
+  animation:appear .3s ease;
+}
+
+.page.active {
+  display:block;
+}
+
+@keyframes appear {
+  from {opacity:0;transform:translateY(8px)}
+  to {opacity:1;transform:translateY(0)}
+}
+
+.panel {
+  background:#141414;
+  border:1px solid #37312a;
+  border-radius:17px;
+  padding:17px;
+  margin-top:13px;
+}
+
+.panel h3 {
+  color:var(--gold);
+  margin-bottom:12px;
+}
+
+.gold-btn {
+  border:0;
+  border-radius:10px;
+  padding:11px 18px;
+  background:linear-gradient(120deg,#a77a32,#f5d58b);
+  color:#17110a;
+  font-weight:900;
+  font-size:13px;
+}
+
+.dark-btn {
+  border:1px solid #80612f;
+  border-radius:10px;
+  padding:10px 16px;
+  background:#19160f;
+  color:var(--gold2);
+  font-weight:bold;
+}
+
+input {
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #55452b;
+  background:#090909;
+  color:white;
+  font-family:inherit;
+  margin:7px 0;
+  outline:none;
+}
+
+input:focus {
+  border-color:var(--gold);
+}
+
+.cards-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.player-card {
+  background:linear-gradient(150deg,#292318,#101010 65%);
+  border:1px solid #b18b49;
+  border-radius:14px;
+  padding:10px;
+  text-align:center;
+  overflow:hidden;
+}
+
+.player-card img {
+  width:100%;
+  height:130px;
+  object-fit:contain;
+  object-position:center bottom;
+  background:linear-gradient(#29251c,#111);
+  border-radius:9px;
+}
+
+.player-card .ovr {
+  color:var(--gold2);
+  font-size:24px;
+  font-weight:900;
+}
+
+.player-card h4 {
+  font-size:14px;
+}
+
+.player-card p {
+  color:#aaa;
+  font-size:11px;
+}
+
+.pitch {
+  border:2px solid #bba06c;
+  border-radius:12px;
+  padding:15px 8px;
+  min-height:350px;
+  background:
+  repeating-linear-gradient(
+    0deg,
+    #174a2c,
+    #174a2c 48px,
+    #1b5633 48px,
+    #1b5633 96px
+  );
+  position:relative;
+  overflow:hidden;
+}
+
+.pitch::before {
+  content:"";
+  position:absolute;
+  top:50%;
+  left:0;
+  width:100%;
+  border-top:2px solid #ffffff66;
+}
+
+.pitch::after {
+  content:"";
+  position:absolute;
+  width:100px;
+  height:100px;
+  border:2px solid #ffffff66;
+  border-radius:50%;
+  top:calc(50% - 50px);
+  left:calc(50% - 50px);
+}
+
+.pitch-players {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px 5px;
+  position:relative;
+  z-index:2;
+}
+
+.pitch-slot {
+  text-align:center;
+  font-size:10px;
+  min-width:0;
+}
+
+.pitch-slot img {
+  width:43px;
+  height:43px;
+  object-fit:contain;
+  border-radius:50%;
+  background:#151515;
+  border:1px solid var(--gold);
+}
+
+.pitch-slot strong {
+  display:block;
+  color:white;
+  text-shadow:0 1px 4px #000;
+}
+
+.pitch-slot small {
+  color:#ffe2a0;
+}
+
+.pack-bag {
+  width:145px;
+  height:175px;
+  margin:20px auto;
+  border:2px solid #d4ae65;
+  border-radius:22px 22px 35px 35px;
+  background:linear-gradient(145deg,#55401f,#17130c 60%,#9c7437);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:48px;
+  box-shadow:0 0 30px #d2a64b22;
+}
+
+.pack-bag.opening {
+  animation:shake .5s infinite;
+}
+
+@keyframes shake {
+  0%,100% {transform:rotate(0)}
+  25% {transform:rotate(5deg)}
+  75% {transform:rotate(-5deg)}
+}
+
+.bottom-note {
+  text-align:center;
+  color:#777;
+  font-size:11px;
+  padding:25px 0;
+}
+
+@media(min-width:650px) {
+  .menu-grid {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .cards-grid {
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+  .hero h1 {
+    font-size:48px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">ZIZO <span>GAMES</span></div>
+  <div class="coins">🪙 <b id="coinCount">500</b> COINS</div>
+</header>
+
+<section class="hero">
+  <small>THE FOOTBALL EXPERIENCE</small>
+  <h1>BUILD YOUR <span>LEGEND</span></h1>
+  <p>Build your dream team. Win the auction. Become a champion.</p>
+  <div class="hero-tag">⚽ YOUR GAME. YOUR RULES.</div>
+</section>
+
+<div id="homePage" class="page active">
+
+  <div class="section-title">
+    <h2>مركز اللعبة</h2>
+    <span>MAIN MENU</span>
+  </div>
+
+  <div class="menu-grid">
+
+    <button class="menu-card" onclick="showPage('auctionPage')">
+      <div class="icon">🔨</div>
+      <h3>المزاد</h3>
+      <p>نافس الذكاء الاصطناعي واجمع فريقك</p>
+    </button>
+
+    <button class="menu-card" onclick="showPage('packsPage')">
+      <div class="icon">🎁</div>
+      <h3>الباكات</h3>
+      <p>افتح الباكات واكتشف اللاعبين</p>
+    </button>
+
+    <button class="menu-card" onclick="showPage('teamPage')">
+      <div class="icon">🏟️</div>
+      <h3>فريقي</h3>
+      <p>شاهد تشكيلتك وملعبك</p>
+    </button>
+
+    <button class="menu-card" onclick="showPage('onlinePage')">
+      <div class="icon">🌐</div>
+      <h3>غرف أونلاين</h3>
+      <p>العب مع أصحابك</p>
+    </button>
+
+    <button class="menu-card" onclick="showPage('topPage')">
+      <div class="icon">🏆</div>
+      <h3>TOP 13</h3>
+      <p>اختبر معلوماتك الكروية</p>
+    </button>
+
+    <button class="menu-card" onclick="showPage('profilePage')">
+      <div class="icon">👤</div>
+      <h3>حسابي</h3>
+      <p>ملفك الشخصي وإحصائياتك</p>
+    </button>
+
+  </div>
+</div>
+
+<!-- AUCTION -->
+
+<section id="auctionPage" class="page">
+  <div class="section-title">
+    <h2>🔨 المزاد</h2>
+    <span>PLAYER AUCTION</span>
+  </div>
+
+  <div class="panel">
+    <h3>اختار نظام المزاد</h3>
+    <button class="dark-btn" onclick="selectAuctionMode(5,100)">CLASSIC · 5 PLAYERS</button>
+    <button class="dark-btn" onclick="selectAuctionMode(7,150)">7 PLAYERS</button>
+    <button class="dark-btn" onclick="selectAuctionMode(11,200)">PRO MAX · 11</button>
+    <p id="auctionStatus" style="color:#aaa;margin-top:15px;font-size:13px">
+      اختار نظام المزاد للبدء.
+    </p>
+  </div>
+
+  <div class="panel" id="auctionArena">
+    <h3>ساحة المزاد</h3>
+    <div id="auctionPlayer" class="cards-grid"></div>
+    <p id="auctionInfo" style="color:#aaa;margin:12px 0">في انتظار بدء المزاد</p>
+    <button class="gold-btn" onclick="placeBid()">زايد</button>
+    <button class="dark-btn" onclick="passBid()">انسحب</button>
+  </div>
+</section>
+
+<!-- PACKS -->
+
+<section id="packsPage" class="page">
+  <div class="section-title">
+    <h2>🎁 الباكات</h2>
+    <span>PACK STORE</span>
+  </div>
+
+  <div class="panel">
+    <h3>اختر الباك</h3>
+    <div class="menu-grid">
+      <button class="menu-card" onclick="openPack('Silver')">
+        <div class="icon">🥈</div>
+        <h3>Silver Pack</h3>
+        <p>باك فضي</p>
+      </button>
+
+      <button class="menu-card" onclick="openPack('Gold')">
+        <div class="icon">🥇</div>
+        <h3>Gold Pack</h3>
+        <p>باك ذهبي</p>
+      </button>
+
+      <button class="menu-card" onclick="openPack('Special')">
+        <div class="icon">💎</div>
+        <h3>Special Pack</h3>
+        <p>باك مميز</p>
+      </button>
+
+      <button class="menu-card" onclick="openPack('Legendary')">
+        <div class="icon">👑</div>
+        <h3>Legendary Pack</h3>
+        <p>باك أسطوري</p>
+      </button>
+    </div>
+
+    <div id="packAnimation" class="pack-bag">🎁</div>
+    <div id="packResult"></div>
+  </div>
+</section>
+
+<!-- MY TEAM -->
+
+<section id="teamPage" class="page">
+  <div class="section-title">
+    <h2>🏟️ تشكيلتي</h2>
+    <span>MY SQUAD</span>
+  </div>
+
+  <div class="panel">
+    <h3>ملعب معاذ</h3>
+    <div id="myPitch" class="pitch">
+      <div id="myPlayers" class="pitch-players"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>ملعب مصطفى</h3>
+    <div id="mustafaPitch" class="pitch">
+      <div id="mustafaPlayers" class="pitch-players"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>تغيير شكل الملعب</h3>
+    <button class="dark-btn" onclick="changePitch('green')">Classic</button>
+    <button class="dark-btn" onclick="changePitch('blue')">Blue</button>
+    <button class="dark-btn" onclick="changePitch('dark')">Dark</button>
+  </div>
+</section>
+
+<!-- ONLINE -->
+
+<section id="onlinePage" class="page">
+  <div class="section-title">
+    <h2>🌐 غرف أونلاين</h2>
+    <span>PLAY WITH FRIENDS</span>
+  </div>
+
+  <div class="panel">
+    <h3>إنشاء غرفة</h3>
+    <input id="roomName" placeholder="اسم الغرفة">
+    <button class="gold-btn" onclick="createRoom()">إنشاء غرفة</button>
+  </div>
+
+  <div class="panel">
+    <h3>دخول غرفة</h3>
+    <input id="roomCode" placeholder="اكتب كود الغرفة">
+    <button class="dark-btn" onclick="joinRoom()">دخول</button>
+    <p id="roomStatus" style="color:#aaa;margin-top:12px"></p>
+  </div>
+</section>
+
+<!-- TOP 13 -->
+
+<section id="topPage" class="page">
+  <div class="section-title">
+    <h2>🏆 TOP 13</h2>
+    <span>FOOTBALL QUIZ</span>
+  </div>
+
+  <div class="panel">
+    <h3>تحدي معلومات كرة القدم</h3>
+    <div id="quizArea">استعد للتحدي!</div>
+    <button class="gold-btn" onclick="startQuiz()">ابدأ التحدي</button>
+  </div>
+</section>
+
+<!-- PROFILE -->
+
+<section id="profilePage" class="page">
+  <div class="section-title">
+    <h2>👤 حسابي</h2>
+    <span>PLAYER PROFILE</span>
+  </div>
+
+  <div class="panel">
+    <h3>ملف اللاعب</h3>
+    <input id="playerName" placeholder="اسم اللاعب">
+    <button class="gold-btn" onclick="saveProfile()">حفظ الاسم</button>
+    <p id="profileStatus" style="color:#aaa;margin-top:12px"></p>
+  </div>
+
+  <div class="panel">
+    <h3>إحصائياتي</h3>
+    <p>عدد اللاعبين: <b id="myPlayerCount">0</b></p>
+  </div>
+</section>
+
+<div class="bottom-note">
+  ZIZO GAMES © 2026 · MADE FOR FOOTBALL LOVERS
+</div>
+
+</div>
+
 
