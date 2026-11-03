@@ -1,1 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090909">
+<title>ZIZO GAMES</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#090909;color:#fff;
+ font-family:Arial,Tahoma,sans-serif;
+}
+:root{
+ --gold:#e8bd58;
+ --gold2:#ffdf8b;
+ --panel:#171717;
+ --muted:#aaa;
+}
+header{
+ padding:18px 15px;
+ display:flex;justify-content:space-between;
+ align-items:center;
+ border-bottom:1px solid #383027;
+ background:#101010;
+ position:sticky;top:0;z-index:10;
+}
+.logo{
+ font-size:23px;font-weight:900;
+ color:var(--gold);
+ letter-spacing:1px;
+}
+.coins{
+ background:#292218;border:1px solid #8d713c;
+ padding:9px 13px;border-radius:20px;
+ color:var(--gold2);font-weight:bold;
+}
+main{max-width:900px;margin:auto;padding:15px}
+.hero{
+ min-height:220px;border-radius:18px;
+ padding:25px 20px;margin:15px 0;
+ background:
+ linear-gradient(90deg,#080808 5%,#111a 60%,#1114),
+ url("https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1200")
+ center/cover;
+ border:1px solid #594827;
+ display:flex;flex-direction:column;
+ justify-content:center;
+}
+.hero h1{font-size:35px;margin:0 0 10px;color:var(--gold2)}
+.hero p{color:#ddd;line-height:1.7;max-width:450px}
+.section-title{
+ color:var(--gold);font-size:20px;
+ margin:27px 0 13px;
+}
+.grid{
+ display:grid;grid-template-columns:repeat(2,1fr);
+ gap:12px;
+}
+.tile{
+ min-height:130px;border:1px solid #443a29;
+ border-radius:15px;padding:17px;
+ background:linear-gradient(145deg,#242019,#111);
+ cursor:pointer;transition:.2s;
+ display:flex;flex-direction:column;
+ justify-content:space-between;
+}
+.tile:active{transform:scale(.97)}
+.tile .icon{font-size:32px}
+.tile h3{margin:10px 0 4px;color:var(--gold2)}
+.tile p{margin:0;color:#aaa;font-size:12px}
+button{
+ border:0;border-radius:10px;padding:12px 17px;
+ background:var(--gold);color:#17120a;
+ font-weight:bold;font-size:15px;cursor:pointer;
+}
+button.secondary{
+ background:#292929;color:#fff;
+ border:1px solid #555;
+}
+button:disabled{opacity:.4;cursor:not-allowed}
+input,select{
+ background:#101010;color:white;
+ border:1px solid #625238;border-radius:9px;
+ padding:12px;width:100%;font-size:16px;
+ margin:7px 0;
+}
+.page{display:none}
+.page.active{display:block}
+.panel{
+ background:var(--panel);border:1px solid #393027;
+ border-radius:15px;padding:17px;margin:12px 0;
+}
+.back{margin:10px 0 20px}
+.player{
+ display:flex;align-items:center;gap:12px;
+ background:#222;border:1px solid #4d402c;
+ border-radius:12px;padding:12px;margin:9px 0;
+}
+.player .face{
+ width:57px;height:65px;border-radius:9px;
+ background:linear-gradient(145deg,#d9b56a,#493b20);
+ display:flex;align-items:center;justify-content:center;
+ font-size:25px;
+}
+.player strong{color:var(--gold2)}
+.player small{display:block;color:#aaa;margin-top:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row button{flex:1}
+.stat{
+ display:inline-block;padding:8px 12px;
+ border-radius:8px;background:#29241b;
+ color:var(--gold2);margin:4px;
+}
+.notice{color:#bbb;line-height:1.7;font-size:13px}
+.big-number{font-size:27px;color:var(--gold2);font-weight:bold}
+#message{color:var(--gold2);min-height:25px}
+footer{text-align:center;padding:30px;color:#666}
+@media(min-width:650px){
+ .grid{grid-template-columns:repeat(3,1fr)}
+ .hero{min-height:280px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">⚽ ZIZO GAMES</div>
+ <div class="coins">🪙 <span id="coins">500</span></div>
+</header>
+
+<main>
+
+<!-- HOME -->
+<section id="home" class="page active">
+ <div class="hero">
+  <h1>ZIZO GAMES</h1>
+  <p>كوّن فريق الأحلام، نافس في المزاد، افتح الباكات، واثبت إنك الأفضل!</p>
+  <button onclick="showPage('auction')">ابدأ اللعب الآن</button>
+ </div>
+
+ <h2 class="section-title">🎮 GAME MODES</h2>
+ <div class="grid">
+  <div class="tile" onclick="showPage('auction')">
+   <span class="icon">🔨</span>
+   <div><h3>AUCTION</h3><p>نافس الذكاء الاصطناعي في المزاد</p></div>
+  </div>
+
+  <div class="tile" onclick="showPage('packs')">
+   <span class="icon">🎁</span>
+   <div><h3>PACKS</h3><p>افتح الباكات واجمع النجوم</p></div>
+  </div>
+
+  <div class="tile" onclick="showPage('top13')">
+   <span class="icon">🏆</span>
+   <div><h3>TOP 13</h3><p>تحديات كرة القدم</p></div>
+  </div>
+
+  <div class="tile" onclick="showPage('rooms')">
+   <span class="icon">🌐</span>
+   <div><h3>ONLINE ROOMS</h3><p>الغرف واللعب مع الأصدقاء</p></div>
+  </div>
+
+  <div class="tile" onclick="showPage('profile')">
+   <span class="icon">👤</span>
+   <div><h3>PROFILE</h3><p>حسابك وإنجازاتك</p></div>
+  </div>
+
+  <div class="tile" onclick="showPage('collection')">
+   <span class="icon">⭐</span>
+   <div><h3>MY TEAM</h3><p>اللاعبون الذين جمعتهم</p></div>
+  </div>
+ </div>
+</section>
+
+<!-- AUCTION -->
+<section id="auction" class="page">
+ <button class="secondary back" onclick="showPage('home')">← الرئيسية</button>
+ <h2 class="section-title">🔨 FOOTBALL AUCTION</h2>
+
+ <div class="panel">
+  <label>اختار حجم المزاد</label>
+  <select id="auctionSize">
+   <option value="5">CLASSIC - 5 لاعبين</option>
+   <option value="7">PRO - 7 لاعبين</option>
+   <option value="11">PRO MAX - 11 لاعب</option>
+  </select>
+  <label>مستوى الذكاء الاصطناعي</label>
+  <select id="difficulty">
+   <option value="easy">سهل</option>
+   <option value="normal">متوسط</option>
+   <option value="hard">صعب</option>
+  </select>
+  <button onclick="startAuction()">ابدأ المزاد</button>
+ </div>
+
+ <div id="auctionGame" class="panel" style="display:none">
+  <div class="row">
+   <span class="stat">جولتك: <b id="round">1</b></span>
+   <span class="stat">ميزانيتك: <b id="budget">100</b>M</span>
+   <span class="stat">الوقت: <b id="timer">30</b></span>
+  </div>
+  <div id="auctionPlayer"></div>
+  <h3>السعر الحالي: <span class="big-number" id="price">5</span>M</h3>
+  <p id="turnMessage">دورك في المزايدة</p>
+  <div class="row">
+   <button onclick="bid()">ارفع 5M</button>
+   <button class="secondary" onclick="passBid()">انسحب</button>
+  </div>
+  <p id="message"></p>
+ </div>
+
+ <div class="panel">
+  <h3>فريقك</h3>
+  <div id="auctionTeam"></div>
+  <h3>فريق المنافس</h3>
+  <div id="aiTeam"></div>
+ </div>
+</section>
+
+<!-- PACKS -->
+<section id="packs" class="page">
+ <button class="secondary back" onclick="showPage('home')">← الرئيسية</button>
+ <h2 class="section-title">🎁 PLAYER PACKS</h2>
+ <div class="grid">
+  <div class="tile" onclick="openPack('Silver',30)">
+   <span class="icon">🥈</span>
+   <h3>SILVER PACK</h3><p>السعر: 30 عملة</p>
+  </div>
+  <div class="tile" onclick="openPack('Gold',60)">
+   <span class="icon">🥇</span>
+   <h3>GOLD PACK</h3><p>السعر: 60 عملة</p>
+  </div>
+  <div class="tile" onclick="openPack('Special',100)">
+   <span class="icon">💎</span>
+   <h3>SPECIAL PACK</h3><p>السعر: 100 عملة</p>
+  </div>
+  <div class="tile" onclick="openPack('Legendary',150)">
+   <span class="icon">👑</span>
+   <h3>LEGENDARY PACK</h3><p>السعر: 150 عملة</p>
+  </div>
+ </div>
+ <div class="panel">
+  <h3>نتيجة فتح الباكات</h3>
+  <div id="packResult">اختار باك لفتحه!</div>
+ </div>
+</section>
+
+<!-- TOP 13 -->
+<section id="top13" class="page">
+ <button class="secondary back" onclick="showPage('home')">← الرئيسية</button>
+ <h2 class="section-title">🏆 TOP 13 CHALLENGES</h2>
+ <div class="panel">
+  <h3>تحدي معلومات كرة القدم</h3>
+  <p id="quizQuestion">مين اللاعب المعروف بلقب البرغوث؟</p>
+  <div id="quizAnswers"></div>
+  <p id="quizResult"></p>
+  <button onclick="nextQuestion()">السؤال التالي</button>
+ </div>
+</section>
+
+<!-- ROOMS -->
+<section id="rooms" class="page">
+ <button class="secondary back" onclick="showPage('home')">← الرئيسية</button>
+ <h2 class="section-title">🌐 ONLINE ROOMS</h2>
+ <div class="panel">
+  <h3>إنشاء غرفة</h3>
+  <input id="roomName" placeholder="اسمك">
+  <button onclick="createRoom()">إنشاء غرفة محلية</button>
+  <div id="roomCode"></div>
+ </div>
+ <div class="panel">
+  <h3>دخول غرفة</h3>
+  <input id="joinCode" placeholder="كود الغرفة">
+  <button onclick="joinRoom()">دخول</button>
+  <p class="notice">الغرف في هذه النسخة تجريبية على نفس الجهاز. اللعب عبر الإنترنت بين هاتفين يحتاج ربط Firebase وإعداد قواعد الأمان.</p>
+ </div>
+</section>
+
+<!-- PROFILE -->
+<section id="profile" class="page">
+ <button class="secondary back" onclick="showPage('home')">← الرئيسية</button>
+ <h2 class="section-title">👤 MY PROFILE</h2>
+ <div class="panel">
+  <input id="username" placeholder="اكتب اسمك">
+  <button onclick="saveName()">حفظ الاسم</button>
+  <p>الاسم: <b id="profileName">Player</b></p>
+  <p>رصيدك: <b id="profileCoins">500</b> عملة</p>
+  <p>عدد اللاعبين: <b id="playerCount">0</b></p>
+ </div>
+</section>
+
+<!-- COLLECTION -->
+<section id="collection" class="page">
+ <button class="secondary back" onclick="showPage('home')">← الرئيسية</button>
+ <h2 class="section-title">⭐ MY TEAM</h2>
+ <div id="collectionList" class="panel">لم تجمع لاعبين بعد.</div>
+</section>
+
+</main>
+
+<footer>ZIZO GAMES © 2026</footer>
+
+<script>
