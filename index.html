@@ -1,1 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZIZO GAMES</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+body{font-family:Arial;background:#0f172a;color:#fff;text-align:center;padding:15px}
+.card{background:#1e293b;padding:20px;border-radius:16px;max-width:480px;margin:auto}
+input{width:90%;padding:12px;margin:8px;border-radius:10px;border:none}
+button{padding:12px;border:none;border-radius:10px;background:#facc15;font-weight:bold;cursor:pointer;margin:5px;width:92%}
+.player{margin:8px;padding:12px;background:#334155;border-radius:10px;text-align:right}
+</style>
+</head>
+<body>
+<h1>🎮 ZIZO GAMES</h1>
+<p>مزاد اللاعيبة</p>
 
+<div id="login" class="card">
+<h2>دخول</h2>
+<input id="email" placeholder="الإيميل">
+<input id="pass" type="password" placeholder="كلمة المرور">
+<button onclick="loginEmail()">دخول بالإيميل</button>
+<button onclick="signupEmail()">عمل حساب جديد</button>
+<button onclick="loginGoogle()" style="background:#fff">دخول بـ Google 🔍</button>
+<p id="msg"></p>
+</div>
+
+<div id="game" class="card" style="display:none">
+<h2 id="welcome"></h2>
+<p>رصيدك: <b id="coins">1000</b> 🪙</p>
+<hr>
+<h3>عمل غرفة</h3>
+<input id="roomName" placeholder="اسم الغرفة">
+<button onclick="createRoom()">عمل غرفة</button>
+<h3>الغرف</h3>
+<div id="rooms"></div>
+<button onclick="logout()" style="background:#ef4444;color:#fff">خروج</button>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyC1xSsdqiuoaVOJQwrLRweLdgmBu3F1PUQ",
+  authDomain: "zizo-games.firebaseapp.com",
+  databaseURL: "https://zizo-games-default-rtdb.firebaseio.com",
+  projectId: "zizo-games",
+  storageBucket: "zizo-games.firebasestorage.app",
+  messagingSenderId: "391985230842",
+  appId: "1:391985230842:web:4d92b77226467c226e2a43",
+  measurementId: "G-C9ZHB4X1PE"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+function loginGoogle(){
+  const p = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(p).catch(e=> document.getElementById('msg').innerText = e.message);
+}
+function loginEmail(){
+  auth.signInWithEmailAndPassword(email.value, pass.value).catch(e=> document.getElementById('msg').innerText = e.message);
+}
+function signupEmail(){
+  auth.createUserWithEmailAndPassword(email.value, pass.value).catch(e=> document.getElementById('msg').innerText = e.message);
+}
+function logout(){ auth.signOut(); }
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById('login').style.display='none';
+    document.getElementById('game').style.display='block';
+    document.getElementById('welcome').innerText = 'أهلا يا ' + (user.displayName || user.email);
+    const ref = db.ref('users/'+user.uid);
+    ref.once('value', snap=>{
+      if(!snap.exists()) ref.set({email:user.email, coins:1000});
+      else document.getElementById('coins').innerText = snap.val().coins;
+    });
+    loadRooms();
+  } else {
+    document.getElementById('login').style.display='block';
+    document.getElementById('game').style.display='none';
+  }
+});
+
+function createRoom(){
+  const n = document.getElementById('roomName').value;
+  if(!n) return alert('اكتب اسم الغرفة');
+  db.ref('rooms').push({name:n, createdBy: auth.currentUser.email, time: Date.now()});
+  document.getElementById('roomName').value='';
+}
+function loadRooms(){
+  db.ref('rooms').on('value', snap=>{
+    const d = document.getElementById('rooms');
+    d.innerHTML='';
+    snap.forEach(c=>{
+      const r = c.val();
+      d.innerHTML += `<div class="player">🏟️ ${r.name}<br><small>${r.createdBy}</small><br><button onclick="alert('المزاد هيبدأ هنا')">ادخل المزاد</button></div>`;
+    });
+    if(d.innerHTML=='') d.innerHTML='لسه مفيش غرف، اعمل أول غرفة!';
+  });
+}
+</script>
+</body>
+</html>
