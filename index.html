@@ -1,1 +1,142 @@
+<!DOCTYPE html>  <html lang="ar" dir="rtl">  
+<head>  
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>ZIZO GAMES - الصح</title>  
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>  
+<style>  
+*{box-sizing:border-box}body{font-family:Arial;background:#0f172a;color:#fff;text-align:center;margin:0;padding:10px}  
+.card{background:#1e293b;padding:16px;border-radius:16px;max-width:750px;margin:12px auto}  
+input,textarea,select{width:95%;padding:12px;margin:6px;border-radius:10px;border:none;font-size:15px}  
+textarea{height:130px;direction:ltr;text-align:left}  
+button{padding:12px;border:none;border-radius:10px;background:#facc15;font-weight:bold;cursor:pointer;margin:5px;width:95%}  
+button.small{width:auto;padding:8px 12px;font-size:13px}  
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}  
+.game{background:#334155;border-radius:14px;overflow:hidden;cursor:pointer}  
+.game img{width:100%;height:110px;object-fit:cover}  
+.playerCard{background:#0f172a;padding:10px;border-radius:12px;margin:7px;display:flex;gap:10px;align-items:center;text-align:right}  
+.playerCard img{width:60px;height:60px;border-radius:50%;object-fit:cover}  
+.tabs button{width:auto;background:#334155;color:#fff}.tabs button.active{background:#facc15;color:#000}  
+.hidden{display:none}.dash{background:#0f172a;padding:12px;border-radius:12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:10px 0}  
+.dash div{background:#334155;padding:10px;border-radius:10px}  
+.adminBox{background:#2e1065;padding:12px;border-radius:12px;margin:8px 0;text-align:right}  
+</style>  
+</head>  
+<body>  
+<div class="card" style="background:linear-gradient(135deg,#facc15,#f97316,#ef4444);color:#000"><h1>ZIZO GAMES</h1><p>وكلاء اللاعيبة | زيزو & عمرو | النسخة الصح</p></div>  <div id="login" class="card"><h2>دخول</h2><input id="email" placeholder="الإيميل"><input id="pass" type="password" placeholder="الباسورد"><button onclick="loginEmail()">دخول</button><button onclick="signupEmail()">حساب جديد</button><button onclick="loginGoogle()" style="background:#fff">دخول Google</button><p id="msg"></p></div>  <div id="main" class="card" style="display:none">  
+<h2 id="welcome"></h2><p>رصيدك: <b id="coins">1000</b> 🪙 | نقط: <b id="points">0</b> ⭐ | <span id="roleBadge">لاعب</span></p>  
+<div class="tabs"><button id="b1" class="active" onclick="showTab('lobby','b1')">🏠 اللوبي</button><button id="b2" onclick="showTab('roomsSec','b2')">🏟️ الغرف</button><button id="b3" onclick="showTab('auctionSec','b3')">🏆 المزاد</button><button id="b4" onclick="showTab('adminSec','b4')">👑 الإدارة</button></div>  <!-- داشبورد -->  <div class="dash"><div>👥 اللاعبين<br><b id="dUsers">0</b></div><div>🏟️ الغرف<br><b id="dRooms">0</b></div><div>⚽ اللاعيبة<br><b id="dPlayers">0</b></div><div>🏆 مزادات<br><b id="dAuctions">0</b></div></div>  <div id="lobby">  
+<h3>الخطوة الصح عشان تلعب: 1- اعمل غرفة 2- صحابك يدخلوا 3- العب</h3>  
+<div class="grid">  
+<div class="game" onclick="goAuction()"><img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400"><b>1. المزاد 🏆</b><small>لازم غرفة + 2 لاعبين على الأقل</small></div>  
+<div class="game" onclick="playBox()"><img src="https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400"><b>2. الصندوق 🎁</b><small>اختار صندوق من 3</small></div>  
+<div class="game" onclick="playSpeed()"><img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400"><b>3. السرعة ⚡</b><small>سؤال بـ 10 ثواني</small></div>  
+<div class="game" onclick="playSteal()"><img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400"><b>4. السرقة 🥷</b><small>اسرق من اللي في الغرفة</small></div>  
+<div class="game" onclick="playChallenge()"><img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400"><b>5. التحدي 🧠</b><small>اختار صح تكسب</small></div>  
+<div class="game" onclick="playTrap()"><img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400"><b>6. المصيدة 🪤</b><small>3 صح و 1 غلط</small></div>  
+</div>  
+<div id="gameArea" style="background:#0f172a;padding:14px;border-radius:12px;margin-top:12px;display:none"></div>  
+<div style="background:#0f172a;padding:10px;border-radius:12px;margin-top:10px"><h4>كل اللاعيبة - مصريين وأجانب - <span id="totalP">0</span> لاعب</h4><input id="searchP" placeholder="دور على أي لاعب - اكتب صلاح، مبابي، مرموش..." oninput="filterPlayers()"><select id="filterPos" onchange="filterPlayers()"><option value="">كل المراكز</option><option>مهاجم</option><option>جناح</option><option>وسط</option><option>مدافع</option><option>حارس</option><option>مصري</option></select><div id="playersList"></div></div>  
+</div>  <div id="roomsSec" class="hidden">  
+<h3>🏟️ الغرف - دي أول خطوة قبل أي لعبة</h3><input id="roomName" placeholder="اسم الغرفة"><button onclick="createRoom()">+ عمل غرفة</button><div id="roomsList"></div><div id="currentRoom" style="background:#0f172a;padding:12px;border-radius:12px;display:none"><h4 id="currentRoomName"></h4><p id="roomMembers"></p><p>اللي في الغرفة دلوقتي هم اللي هيلعبوا معاك في المزاد والسرقة</p><button onclick="leaveRoom()" style="background:#ef4444;color:#fff">خروج</button></div>  
+</div>  <div id="auctionSec" class="hidden">  
+<h3>🏆 المزاد - لازم تكون جوه غرفة</h3><p id="auctionStatus" style="background:#ef4444;padding:10px;border-radius:10px">⚠️ انت مش جوه غرفة! روح اعمل غرفة الأول من تاب الغرف، وبعدين تعالى هنا</p>  
+<div class="playerCard"><img id="auctionImg" src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200"><div style="flex:1"><h3 id="auctionPlayer">مفيش مزاد شغال</h3><p>أعلى مزايدة: <b id="topBid">0</b> بواسطة <b id="topBidder">-</b></p><p>الوقت: <b id="timer">--</b> | اللي في الغرفة: <b id="auctionRoomPlayers">0</b></p></div></div>  
+<input id="bidAmount" type="number" placeholder="مزايدتك"><button onclick="placeBid()">زايد 🔥</button><button onclick="startAuction()" style="background:#22c55e;color:#fff">ابدأ المزاد (للأدمن بس)</button><p id="bidMsg"></p>  
+</div>  <div id="adminSec" class="hidden">  
+<div id="adminLogin"><h3>👑 الإدارة - زيزو وعمرو بس</h3><p>الباسورد: 654321</p><input id="adminPass" type="password" placeholder="باسورد الإدارة"><button onclick="checkAdmin()">افتح الإدارة</button><p id="adminLoginMsg"></p></div>  
+<div id="adminPanel" class="hidden">  
+<h3>⚙️ لوحة الإدارة + داشبورد</h3>  
+<div class="dash"><div>👥 مستخدمين<br><b id="aUsers">0</b></div><div>⚽ لاعيبة<br><b id="aPlayers">0</b></div><div>🏟️ غرف<br><b id="aRooms">0</b></div><div>💬 رسايل<br><b id="aChats">0</b></div></div>  <div class="adminBox"><h4>🔑 تغيير الباسورد - لازم القديم</h4><input id="oldAdminPass" type="password" placeholder="القديم - 654321"><input id="newAdminPass" type="password" placeholder="الجديد"><input id="confirmAdminPass" type="password" placeholder="أكد الجديد"><button onclick="changeAdminPass()" style="background:#22c55e;color:#fff">غير الباسورد</button><p id="passChangeMsg"></p></div>  <div class="adminBox"><h4>👤 إضافة حساب / تعديل رصيد</h4><input id="newUserEmail" placeholder="إيميل الحساب"><input id="newUserCoins" type="number" placeholder="رصيد"><button onclick="addUser()">أضف / عدل حساب</button><div id="allUsers"></div></div>  <div class="adminBox"><h4>⚽ إضافة لاعب جديد - مصري أو أجنبي</h4><input id="pName" placeholder="اسم اللاعب"><input id="pPos" placeholder="المركز - مهاجم / جناح / وسط / مدافع / حارس / مصري"><input id="pPrice" type="number" placeholder="السعر"><input id="pRate" type="number" placeholder="الريت"><input id="pImg" placeholder="لينك صورة - أو سيبه فاضي"><button onclick="addPlayer()" style="background:#22c55e;color:#fff">أضف اللاعب</button><div id="adminPlayers"></div></div>  <div class="adminBox"><h4>💻 محرر الأكواد - جوه الإدارة - ضيف كود من غير ما ترجعلي</h4><p>حط هنا أي كود HTML أو JavaScript جديد، وهيشتغل على طول</p><input id="codeTitle" placeholder="اسم الكود"><textarea id="codeContent" placeholder="حط الكود هنا... مثال: <div style='background:red;padding:10px'>لعبة جديدة!</div>"></textarea><button onclick="saveCustomCode()" style="background:#22c55e;color:#fff">احفظ الكود 💾</button><button onclick="runCustomCode()" style="background:#3b82f6;color:#fff">جرب الكود ▶️</button><div id="customCodesList"></div><div id="customCodeOutput" style="background:#000;padding:10px;border-radius:10px;margin-top:8px"></div></div>  <button onclick="closeAdmin()" style="background:#ef4444;color:#fff">قفل الإدارة</button>
 
+</div>  
+</div>  
+<button onclick="logout()" style="background:#ef4444;color:#fff;margin-top:10px">خروج</button>  
+</div>  
+<div id="extraCodes"></div>  
+<script>  
+const firebaseConfig={apiKey:"AIzaSyC1xSsdqiuoaVOJQwrLRweLdgmBu3F1PUQ",authDomain:"zizo-games.firebaseapp.com",databaseURL:"https://zizo-games-default-rtdb.firebaseio.com",projectId:"zizo-games",storageBucket:"zizo-games.firebasestorage.app",messagingSenderId:"391985230842",appId:"1:391985230842:web:4d92b77226467c226e2a43",measurementId:"G-C9ZHB4X1PE"};  
+firebase.initializeApp(firebaseConfig);const auth=firebase.auth();const db=firebase.database();  
+let myUser=null,myCoins=1000,currentRoomId=null,currentRoomName='',auctionTimer=null,ADMIN_PASS=localStorage.getItem('zizo_admin_pass')||"654321",isAdmin=false,allPlayers=[],savedCodes=JSON.parse(localStorage.getItem('zizo_custom_codes')||'[]');  
+// كل لعيبة العالم - مصريين + أجانب  
+const WORLD_PLAYERS=[  
+{name:'محمد صلاح',pos:'جناح',price:95,rate:98,img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200'},  
+{name:'عمر مرموش',pos:'مصري',price:85,rate:92,img:'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=200'},  
+{name:'مصطفى محمد',pos:'مصري',price:70,rate:85,img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'},  
+{name:'محمد الشناوي',pos:'حارس',price:60,rate:88,img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200'},  
+{name:'أحمد سيد زيزو',pos:'مصري',price:75,rate:89,img:'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200'},  
+{name:'إمام عاشور',pos:'مصري',price:72,rate:87,img:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200'},  
+{name:'تريزيغيه',pos:'مصري',price:68,rate:84,img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200'},  
+{name:'محمد عبد المنعم',pos:'مدافع',price:65,rate:86,img:'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=200'},  
+{name:'أحمد حجازي',pos:'مدافع',price:60,rate:83,img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'},  
+{name:'محمد النني',pos:'وسط',price:58,rate:82,img:'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200'},  
+{name:'كيليان مبابي',pos:'مهاجم',price:99,rate:99,img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200'},  
+{name:'إيرلينج هالاند',pos:'مهاجم',price:97,rate:98,img:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200'},  
+{name:'فينيسيوس جونيور',pos:'جناح',price:94,rate:96,img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200'},  
+{name:'جود بيلينجهام',pos:'وسط',price:92,rate:95,img:'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=200'},  
+{name:'هاري كين',pos:'مهاجم',price:90,rate:94,img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'},  
+{name:'لامين يامال',pos:'جناح',price:93,rate:95,img:'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200'},  
+{name:'بوكايو ساكا',pos:'جناح',price:88,rate:93,img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200'},  
+{name:'كيفين دي بروين',pos:'وسط',price:89,rate:94,img:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200'},  
+{name:'رودري',pos:'وسط',price:90,rate:95,img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200'},  
+{name:'ليونيل ميسي',pos:'مهاجم',price:96,rate:97,img:'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=200'},  
+{name:'كريستيانو رونالدو',pos:'مهاجم',price:95,rate:96,img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'},  
+{name:'نيمار',pos:'جناح',price:87,rate:92,img:'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200'},  
+{name:'فودين',pos:'وسط',price:86,rate:92,img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200'},  
+{name:'أوسيمين',pos:'مهاجم',price:84,rate:91,img:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200'},  
+{name:'لوكاكو',pos:'مهاجم',price:80,rate:88,img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200'},  
+{name:'ديبالا',pos:'مهاجم',price:82,rate:90,img:'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=200'},  
+{name:'فان دايك',pos:'مدافع',price:88,rate:93,img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'},  
+{name:'كورتوا',pos:'حارس',price:89,rate:94,img:'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=200'},  
+{name:'أليسون',pos:'حارس',price:88,rate:93,img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=200'},  
+{name:'أشرف حكيمي',pos:'مدافع',price:87,rate:92,img:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200'},  
+];  
+function loginGoogle(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>msg.innerText=e.message)}  
+function loginEmail(){auth.signInWithEmailAndPassword(email.value,pass.value).catch(e=>msg.innerText=e.message)}  
+function signupEmail(){auth.createUserWithEmailAndPassword(email.value,pass.value).catch(e=>msg.innerText=e.message)}  
+function logout(){auth.signOut()}  
+function showTab(t,b){['lobby','roomsSec','auctionSec','adminSec'].forEach(id=>document.getElementById(id).classList.add('hidden'));document.getElementById(t).classList.remove('hidden');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));if(b)document.getElementById(b).classList.add('active')}  
+auth.onAuthStateChanged(u=>{if(u){myUser=u;login.style.display='none';main.style.display='block';welcome.innerText='أهلا يا '+(u.displayName||u.email);const ref=db.ref('users/'+u.uid);ref.once('value',s=>{if(!s.exists())ref.set({email:u.email,coins:1000,points:0});else{myCoins=s.val().coins||1000;coins.innerText=myCoins;points.innerText=s.val().points||0;}});loadRooms();loadPlayers();listenAuction();loadDashboard();loadCustomCodes();}else{login.style.display='block';main.style.display='none';}});  
+function loadDashboard(){db.ref('users').on('value',s=>{dUsers.innerText=s.numChildren();aUsers.innerText=s.numChildren();});db.ref('rooms').on('value',s=>{dRooms.innerText=s.numChildren();aRooms.innerText=s.numChildren();});}  
+function checkAdmin(){if(adminPass.value===ADMIN_PASS){isAdmin=true;adminLogin.style.display='none';adminPanel.classList.remove('hidden');roleBadge.innerText='👑 مدير';}else adminLoginMsg.innerText='الباسورد غلط! هو '+ADMIN_PASS;}  
+function closeAdmin(){isAdmin=false;adminPanel.classList.add('hidden');adminLogin.style.display='block';}  
+function changeAdminPass(){if(oldAdminPass.value!==ADMIN_PASS){passChangeMsg.innerText='القديم غلط';return;}if(newAdminPass.value!==confirmAdminPass.value){passChangeMsg.innerText='الجديد مش متطابق';return;}ADMIN_PASS=newAdminPass.value;localStorage.setItem('zizo_admin_pass',ADMIN_PASS);passChangeMsg.innerText='تم! الجديد هو '+ADMIN_PASS;}  
+function createRoom(){const n=roomName.value.trim();if(!n)return alert('اكتب اسم الغرفة');const id=db.ref('rooms').push().key;db.ref('rooms/'+id).set({name:n,createdBy:myUser.email,members:{[myUser.uid]:myUser.email}});roomName.value='';}  
+function loadRooms(){db.ref('rooms').on('value',snap=>{roomsList.innerHTML='';snap.forEach(c=>{const r=c.val();const count=r.members?Object.keys(r.members).length:0;roomsList.innerHTML+=`<div class="playerCard"><div style="flex:1"><b>🏟️ ${r.name}</b><br>عملها: ${r.createdBy} - جواها ${count} لاعب</div><button class="small" onclick="joinRoom('${c.key}','${r.name}')">ادخل</button><button class="small" style="background:#ef4444;color:#fff" onclick="deleteRoom('${c.key}')">مسح</button></div>`;});if(!roomsList.innerHTML)roomsList.innerHTML='مفيش غرف';});}  
+function joinRoom(id,name){currentRoomId=id;currentRoomName=name;db.ref('rooms/'+id+'/members/'+myUser.uid).set(myUser.email);currentRoom.style.display='block';currentRoomName.innerText='انت جوه: '+name;auctionStatus.innerText='✅ انت جوه غرفة: '+name+' - دلوقتي تقدر تزايد';auctionStatus.style.background='#22c55e';updateRoomMembers();}  
+function updateRoomMembers(){if(!currentRoomId)return;db.ref('rooms/'+currentRoomId+'/members').once('value',s=>{let h='اللي في الغرفة: ';s.forEach(m=>{h+=m.val()+' , ';});roomMembers.innerText=h;auctionRoomPlayers.innerText=s.numChildren();});}  
+function leaveRoom(){if(currentRoomId)db.ref('rooms/'+currentRoomId+'/members/'+myUser.uid).remove();currentRoomId=null;currentRoom.style.display='none';auctionStatus.innerText='⚠️ انت مش جوه غرفة! روح اعمل غرفة الأول';auctionStatus.style.background='#ef4444';}  
+function deleteRoom(id){if(confirm('تمسح؟'))db.ref('rooms/'+id).remove();}  
+function loadPlayers(){db.ref('players').on('value',snap=>{if(!snap.exists()){WORLD_PLAYERS.forEach(p=>db.ref('players').push(p));return;}allPlayers=[];snap.forEach(c=>allPlayers.push({id:c.key,...c.val()}));dPlayers.innerText=allPlayers.length;aPlayers.innerText=allPlayers.length;totalP.innerText=allPlayers.length;filterPlayers();});}  
+function filterPlayers(){let list=allPlayers;const q=searchP.value.trim();if(q)list=list.filter(p=>p.name.includes(q));const f=filterPos.value;if(f)list=list.filter(p=>p.pos===f);playersList.innerHTML='';adminPlayers.innerHTML='';list.forEach(p=>{playersList.innerHTML+=`<div class="playerCard"><img src="${p.img}"><div style="flex:1"><b>${p.name}</b> - ${p.pos} - ريت ${p.rate}<br>${p.price} 🪙</div><button class="small" onclick="startAuctionWith('${p.id}','${p.name}',${p.price},'${p.img}')">مزاد</button></div>`;adminPlayers.innerHTML+=`<div class="playerCard"><img src="${p.img}"><div style="flex:1">${p.name} - ${p.price}</div><button class="small" onclick="deletePlayer('${p.id}')">مسح</button></div>`;});}  
+function addPlayer(){const n=pName.value.trim();if(!n)return alert('اكتب اسم اللاعب');db.ref('players').push({name:n,pos:pPos.value||'مهاجم',price:parseInt(pPrice.value)||50,rate:parseInt(pRate.value)||85,img:pImg.value||'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200'});pName.value='';pPrice.value='';pImg.value='';alert('تم إضافة '+n);}  
+function deletePlayer(id){if(!isAdmin)return alert('ادخل الإدارة');db.ref('players/'+id).remove();}  
+function addUser(){if(!isAdmin)return alert('ادخل الإدارة');const em=newUserEmail.value.trim();if(!em)return alert('اكتب الإيميل');db.ref('users').once('value',s=>{let f=null;s.forEach(u=>{if(u.val().email===em)f=u.key;});if(f)db.ref('users/'+f).update({coins:parseInt(newUserCoins.value)||1000});else db.ref('users').push({email:em,coins:parseInt(newUserCoins.value)||1000,points:0});alert('تم');loadAllUsers();});}  
+function loadAllUsers(){db.ref('users').on('value',s=>{let h='';s.forEach(u=>{h+=`<div class="playerCard"><div style="flex:1">${u.val().email} - 🪙 ${u.val().coins}</div><button class="small" style="background:#ef4444;color:#fff" onclick="deleteUser('${u.key}')">مسح</button></div>`;});allUsers.innerHTML=h;});}  
+function deleteUser(id){db.ref('users/'+id).remove();}  
+function goAuction(){if(!currentRoomId){alert('⚠️ لازم تعمل غرفة الأول! روح تاب الغرف، اعمل غرفة، وادخل فيها، وبعدين تعالى المزاد');showTab('roomsSec','b2');return;}showTab('auctionSec','b3');}  
+function startAuctionWith(id,name,price,img){if(!currentRoomId){alert('لازم غرفة الأول');showTab('roomsSec','b2');return;}if(!isAdmin && myUser.email!=='amrelhalow@gmail.com'){alert('المزاد بيبدأه الأدمن بس - زيزو وعمرو');return;}db.ref('auction').set({player:name,playerId:id,topBid:price,topBidder:'مفيش حد',endAt:Date.now()+60000,roomId:currentRoomId,img:img});showTab('auctionSec','b3');}  
+function startAuction(){if(!currentRoomId){alert('لازم غرفة الأول');return;}const p=allPlayers[Math.floor(Math.random()*allPlayers.length)];startAuctionWith(p.id,p.name,p.price,p.img);}  
+function listenAuction(){db.ref('auction').on('value',snap=>{const a=snap.val();if(!a){auctionPlayer.innerText='مفيش مزاد شغال';return;}auctionPlayer.innerText='🔥 المزاد على: '+a.player;if(a.img)auctionImg.src=a.img;topBid.innerText=a.topBid;topBidder.innerText=a.topBidder;clearInterval(auctionTimer);auctionTimer=setInterval(()=>{const left=Math.max(0,Math.floor((a.endAt-Date.now())/1000));timer.innerText=left+' ثانية';if(left<=0){clearInterval(auctionTimer);timer.innerText='انتهى! الفائز: '+a.topBidder;}},1000);});}  
+function placeBid(){if(!currentRoomId){bidMsg.innerText='⚠️ لازم تدخل غرفة الأول!';return;}const amt=parseInt(bidAmount.value);if(!amt)return alert('اكتب مزايدتك');db.ref('auction').once('value',s=>{const a=s.val();if(!a)return alert('مفيش مزاد شغال، خلي الأدمن يبدأ');if(a.roomId!==currentRoomId)return bidMsg.innerText='المزاد ده في غرفة تانية!';if(amt<=a.topBid)return bidMsg.innerText='لازم أكتر من '+a.topBid;if(amt>myCoins)return bidMsg.innerText='رصيدك مش كفاية';db.ref('auction').update({topBid:amt,topBidder:myUser.email});bidMsg.innerText='انت الأعلى 🔥';});}  
+// الألعاب الحقيقية - كل لعبة بتتلعب بجد  
+function showGame(html){gameArea.style.display='block';gameArea.innerHTML=html;}  
+function playBox(){const boxes=['🎁','🎁','🎁'];let win=Math.floor(Math.random()*3);showGame(`<h3>🎁 الصندوق - اختار صندوق</h3><p>واحد فيهم فيه لاعب جامد، والاتنين التانيين مقلب</p><div style="display:flex;gap:10px;justify-content:center"><button onclick="openBox(0,${win})" style="font-size:40px">🎁</button><button onclick="openBox(1,${win})" style="font-size:40px">🎁</button><button onclick="openBox(2,${win})" style="font-size:40px">🎁</button></div><p id="boxRes"></p>`);}  
+function openBox(i,win){const p=allPlayers[Math.floor(Math.random()*allPlayers.length)];if(i===win){boxRes.innerText='🎉 كسبت! طلعلك '+p.name+'! +100 كوينز';myCoins+=100;coins.innerText=myCoins;}else{boxRes.innerText='😂 مقلب! طلعلك صندوق فاضي';}}  
+function playSpeed(){const p=allPlayers[Math.floor(Math.random()*allPlayers.length)];const wrong=allPlayers[Math.floor(Math.random()*allPlayers.length)];showGame(`<h3>⚡ السرعة - 10 ثواني</h3><p>${p.name} مركزه ايه؟</p><button onclick="answerSpeed(true)"> ${p.pos} ✅</button><button onclick="answerSpeed(false)"> ${wrong.pos} ❌</button><p id="speedRes"></p>`);}  
+function answerSpeed(ok){speedRes.innerText=ok?'✅ صح! +50 نقط':'❌ غلط!';if(ok){myCoins+=50;coins.innerText=myCoins;}}  
+function playSteal(){if(!currentRoomId){alert('السرقة لازم غرفة - فيها صحابك عشان تسرق منهم');showTab('roomsSec','b2');return;}const p=allPlayers[Math.floor(Math.random()*allPlayers.length)];showGame(`<h3>🥷 السرقة</h3><p>هتسرق ${p.name} من اللي في الغرفة؟</p><button onclick="doSteal('${p.name}')">اسرق 🥷</button><p id="stealRes"></p>`);}  
+function doSteal(n){const ok=Math.random()>0.5;stealRes.innerText=ok?'🎉 نجحت! سرقت '+n:'😂 فشلت! اتقفشت';}  
+function playChallenge(){const p=allPlayers[Math.floor(Math.random()*allPlayers.length)];showGame(`<h3>🧠 التحدي</h3><p>الدقيقة 89، فريقك خسران 1-0، هتنزل ${p.name}؟</p><button onclick="challengeRes.innerText='✅ قرار صح! كسبت 100 كوينز'">نزله 🔥</button><button onclick="challengeRes.innerText='❌ خسرت الماتش'">سيبه على الدكة</button><p id="challengeRes"></p>`);}  
+function playTrap(){const a=allPlayers[Math.floor(Math.random()*allPlayers.length)];const b=allPlayers[Math.floor(Math.random()*allPlayers.length)];const c=allPlayers[Math.floor(Math.random()*allPlayers.length)];showGame(`<h3>🪤 المصيدة</h3><p>واحد فيهم مقلب، اختار الصح</p><button onclick="trapRes.innerText='✅ صح! ده جامد'">${a.name}</button><button onclick="trapRes.innerText='🪤 وقعت في المصيدة!'">${b.name} (مقلب)</button><button onclick="trapRes.innerText='✅ صح! ده جامد'">${c.name}</button><p id="trapRes"></p>`);}  
+// محرر الأكواد  
+function saveCustomCode(){if(!isAdmin)return alert('ادخل الإدارة');const t=codeTitle.value.trim(),c=codeContent.value.trim();if(!t||!c)return alert('اكتب الاسم والكود');savedCodes.push({title:t,code:c,date:new Date().toLocaleString()});localStorage.setItem('zizo_custom_codes',JSON.stringify(savedCodes));loadCustomCodes();alert('اتحفظ ✅');}  
+function loadCustomCodes(){customCodesList.innerHTML='<h5>أكوادك:</h5>';savedCodes.forEach((it,i)=>{customCodesList.innerHTML+=`<div class="playerCard"><div style="flex:1">${it.title} - ${it.date}</div><button class="small" onclick="runSavedCode(${i})">شغل</button><button class="small" style="background:#ef4444;color:#fff" onclick="deleteSavedCode(${i})">مسح</button></div>`;});}  
+function runCustomCode(){customCodeOutput.innerHTML=codeContent.value;extraCodes.innerHTML+=codeContent.value;}  
+function runSavedCode(i){customCodeOutput.innerHTML=savedCodes[i].code;extraCodes.innerHTML+=savedCodes[i].code;}  
+function deleteSavedCode(i){savedCodes.splice(i,1);localStorage.setItem('zizo_custom_codes',JSON.stringify(savedCodes));loadCustomCodes();}  
+window.onload=()=>{savedCodes.forEach(it=>extraCodes.innerHTML+=it.code);};  
+</script>  
+</body>  
+</html>  
